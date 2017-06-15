@@ -7,14 +7,16 @@
 #define ID_RIGHT 2
 #define ID_BACK 3
 #define ID_FOWARD 4
-#define ID_UP 5
-#define ID_DOWN 6
+#define ID_PRINT 5
 
 #define TYPE_SWORD 1
 #define TYPE_BOW 2
 #define TYPE_RING 3
 #define TYPE_POTION 4
 #define TYPE_GOLD 5
+
+//GLOBAL VARIABLES
+extern unsigned int seed;
 
 //STRUCTS
 
@@ -61,3 +63,11 @@ typedef struct dungeon{
 Dungeon *generate_dungeon();
 
 Character *generate_player();
+
+void print_world(Dungeon *d, int in);
+
+void print_room(Dungeon *d);
+
+void print_monsters(Monsters *m);
+
+int count_rooms(Dungeon *d, int c);
