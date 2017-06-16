@@ -5,7 +5,8 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
-
+#include "tomlib.h"
+#include <ctype.h>
 
 #define ROOM_CO 3
 
@@ -68,17 +69,26 @@ void print_world(Dungeon *d, int in){
 	if(in == 0) printf("number of rooms = %d\n", count_rooms(d,0));
 }
 
+int count_monsters(Monsters *m){
+	int c = 0;
+	while(m){
+		c ++;
+		m = m->next;
+	}
+	return c;
+}
+
 void print_monsters(Monsters *m){
 	while(m){
 		if(m->monster){
-			printf("%s\n",m->monster->name);
+			printf("%s\t(level %d)\n\t%.1lf/%.1lf\n",m->monster->name, m->monster->level,m->monster->life, m->monster->lifeTotal);
 		}
 		m = m->next;
 	}	
 }
 
 void print_room(Dungeon *d){
-	printf("You are in "C_G"%s"C_W"\n",d->name);
+	printf("You are in a "C_G"%s"C_W"\n",d->name);
 	if(d->back == NULL){
 		printf("To your back there is no exit. ");
 	}else{
@@ -100,7 +110,7 @@ void print_room(Dungeon *d){
 	if(d->monsters == NULL){
 		printf("\nThere are no "C_R"monsters"C_W"\n");
 	}else{
-		printf("\nThere are "C_R"monsters"C_W" in this room, they are:\n");
+		printf("\nThere are %d "C_R"monsters"C_W" in this room, they are:\n", count_monsters(d->monsters));
 		print_monsters(d->monsters);
 	}
 }
@@ -119,29 +129,100 @@ Inv *generate_inventory(){
 	return i;
 }
 
-#define ROOM_PREFIX_NUM 5
-#define ROOM_NAME_NUM 5
-#define ROOM_SUFFIX_NUM 8
+char ret_c(){
+	char a = rand()%25 + 'A';
+	if(is_vowel(a)){
+		return ret_c();
+	}else{
+		//printf("%c",a);
+		return a;
+	}
+}
 
-char *generate_monster_name(){
+char ret_v(){
+	int a = rand()%5;
+	switch(a){
+		case 0:
+			return 'A';
+		case 1:
+			return 'E';
+		case 2:
+			return 'I';
+		case 3:
+			return 'O';
+		case 4:
+			return 'U';
+	}
+	return 'A';
+}
+
+void generate_monster_name(int length, char str[length]){
+	for(int i = 0; i < length; i ++){
+		if(i%2){
+			str[i] = tolower(ret_c());
+		}else{
+			if( i == 0){
+				str[i] = ret_v();
+			}else{
+				str[i] = tolower(ret_v());
+			}
+		}
+		//printf("i = %d, str[%d] = %c = %d\n",i, i, str[i], str[i]);
+	}
+	str[length] = '\0';
+	//return str;
+}
+
+Character *generate_monster(){
+	Character *m = malloc(sizeof(Character));
+	assert(m);
+
+	//name
+	generate_monster_name(rand()%5 + 3, m->name);
+	//printf("Monster name generated: %s\n",m->name);
+	int r1 = rand()%8 + 1;
+	int r2 = rand()%8 + 1;
+	int r3 = rand()%7;
+	m->level = r1 * r2 + r3; //generates a random number between 0 and 70, with a bias to lower numbers
+	//printf("Monster %s's level = %d\n",m->name, m->level);
+	m->lifeTotal = m->level * 10 + rand()%10;
+	m->life = m->lifeTotal;
+	m->inventory = NULL;
+	return m;
+}
+
+char generate_room_name(Dungeon *d, char name[MAX_ROOM_NAME]){
 	
 }
 
+#define ROOM_PREFIX_NUM 49
+#define ROOM_NAME_NUM 19
+#define ROOM_SUFFIX_NUM 15
+
 Nameholder *generate_dungeon_name(){
-	//printf("called generate dungeon name\n");
 	Nameholder *sa = malloc(sizeof(Nameholder));
-	//printf("nh = %p\n",sa);
-	//printf("name holder malloced, asserting\n");
-	
+		
 	char rNames[ROOM_NAME_NUM][64] = {{0}};
 	strcpy(rNames[0], "dungeon");
 	strcpy(rNames[1], "cellar");
 	strcpy(rNames[2], "cave");
-	strcpy(rNames[3], "room");	
+	strcpy(rNames[3], "room");
 	strcpy(rNames[4], "hallway");
-	
-	//printf("rNames successfully made\n");
-
+	strcpy(rNames[5], "throne room");
+	strcpy(rNames[6], "tunnel");
+	strcpy(rNames[7], "chapel");
+	strcpy(rNames[8], "basement");
+	strcpy(rNames[9], "cavern");
+	strcpy(rNames[10], "mine shaft");
+	strcpy(rNames[11], "bridge");
+	strcpy(rNames[12], "burrow");
+	strcpy(rNames[13], "chamber");
+	strcpy(rNames[14], "crypt");
+	strcpy(rNames[15], "vault");
+	strcpy(rNames[16], "grotto");
+	strcpy(rNames[17], "den");
+	strcpy(rNames[18], "passage");
+		
 	char dNames[ROOM_SUFFIX_NUM][64] = {{0}};
 	//printf("dNames created\n");
 	strcpy(dNames[0], " of despair");
@@ -152,79 +233,127 @@ Nameholder *generate_dungeon_name(){
 	strcpy(dNames[5], " of plenty");
 	strcpy(dNames[6], " of monsters");
 	strcpy(dNames[7], " of faith");
-	//printf("dNames successfully made\n");
+	strcpy(dNames[8], " of contempt");
+	strcpy(dNames[9], " of cruelty");
+	strcpy(dNames[10], " of wrath");
+	strcpy(dNames[11], " of death");
+	strcpy(dNames[12], " of life");
+	strcpy(dNames[13], " of horror");
+	//monster suffix
+	int length = 3 + rand()%5;
+	char str[length];
+	for(int i = 0; i < length; i ++) str[i] = '\0';
+	generate_monster_name(length, str);
+	char str2[64] = " of \0";
+	strcat(str2, str);
+	strcpy(dNames[ROOM_SUFFIX_NUM - 1], str2);
 	
 	char pNames[ROOM_PREFIX_NUM][64] = {{0}};
-	//printf("pNames created\n");
 	strcpy(pNames[0], "cold ");
 	strcpy(pNames[1], "dark ");
 	strcpy(pNames[2], "stone ");
 	strcpy(pNames[3], "quiet ");
 	strcpy(pNames[4], "whispering ");
-	//printf("pNames successfully made\n");
-
+	strcpy(pNames[5], "shabby ");
+	strcpy(pNames[6], "grimy ");
+	strcpy(pNames[7], "seedy ");
+	strcpy(pNames[8], "dim ");
+	strcpy(pNames[9], "wailing ");
+	strcpy(pNames[10], "muted ");
+	strcpy(pNames[11], "brown ");
+	strcpy(pNames[12], "white ");
+	strcpy(pNames[13], "vile ");
+	strcpy(pNames[14], "loathsome ");
+	strcpy(pNames[15], "acrid ");
+	strcpy(pNames[16], "pungent ");
+	strcpy(pNames[17], "burning ");
+	strcpy(pNames[18], "frozen ");
+	strcpy(pNames[19], "icy ");
+	strcpy(pNames[20], "frigid ");
+	strcpy(pNames[21], "hellish ");
+	strcpy(pNames[22], "sweltering ");
+	strcpy(pNames[23], "blazing ");
+	strcpy(pNames[24], "fiery ");
+	strcpy(pNames[25], "heated ");
+	strcpy(pNames[26], "rustling ");
+	strcpy(pNames[27], "howling ");
+	strcpy(pNames[28], "creaking ");
+	strcpy(pNames[29], "damaged ");
+	strcpy(pNames[30], "fractured ");
+	strcpy(pNames[31], "evil ");
+	strcpy(pNames[32], "ravaged ");
+	strcpy(pNames[33], "narrow ");
+	strcpy(pNames[34], "expansive ");
+	strcpy(pNames[35], "echoing ");	
+	strcpy(pNames[36], "large ");
+	strcpy(pNames[37], "prison ");
+	strcpy(pNames[38], "torture ");
+	strcpy(pNames[39], "abandoned ");
+	strcpy(pNames[40], "claustrophobic ");
+	strcpy(pNames[41], "slimy ");
+	strcpy(pNames[42], "damp ");
+	strcpy(pNames[43], "unused ");
+	strcpy(pNames[44], "defunct ");
+	strcpy(pNames[45], "lifeless ");
+	strcpy(pNames[46], "breathless ");
+	strcpy(pNames[47], "drab ");
+	strcpy(pNames[48], "faded ");
 
 	char prefix[64] = {0};
 	strcpy(prefix, pNames[rand()%ROOM_PREFIX_NUM]);
-	//printf("prefix made\n");
-
-	if(rand()%2 == 0){
+	if(rand()%4 == 0){
 		prefix[0] = '\0';
-		//printf("prefix set to 0\n");
-	}else{
-		//printf("Prexif kept\n");
 	}
 
 	char room[64] = {0};
-	//printf("room created\n");
 	strcpy(room, rNames[rand()%ROOM_NAME_NUM]);
-	//printf("copied room\n");
-
 	char suffix[64] = {0};
-	//printf("suffix init\n");
 	strcpy(suffix, dNames[rand()%ROOM_SUFFIX_NUM]);
-	
-	//printf("suffix made\n");
 	if(rand()%2 == 0){
 		suffix[0] = '\0';
-		//printf("suffix set to 0\n");
-	}else{
-		//printf("suffix kept\n");
 	}
-
 	char *name = strcat(prefix, room);
-	//printf("    one succesful strcat");
 	name = strcat(name, suffix);
-	//printf("    two succesful strcat");
-	
 	strcpy(sa->name, name);
 	return sa;	
+}
+
+Monsters *generate_monster_list(){
+	Monsters *ml = malloc(sizeof(Monsters));
+	ml->monster = generate_monster();
+	ml->next = NULL;
+	return ml;
+}
+
+Monsters *generate_many_monsters(int num){
+	if(num < 1) return NULL;
+	Monsters *ml = generate_monster_list();
+	Monsters *head = ml;
+	for(int i = 1; i < num; i ++){
+		ml->next = generate_monster_list();
+		ml = ml->next;
+	}
+	ml->next = NULL;
+	return head;
 }
 
 Dungeon *create_room(){
 	//printf("creating a room\n");
 	Dungeon *d = malloc(sizeof(Dungeon));
 	assert(d);
-	//printf("    allocated memory\n");
 	
-	d->inventory = NULL;
-	//printf("    d->inventory set to NULL\n");
-	generate_inventory();
-	//printf("    generate inventory called experimentally\n");
-	d->inventory = generate_inventory();
-	//printf("    generated inventory\n");
-	
-	char s[MAX_ROOM_NAME] = "nothing";
-	//printf("    s = %s\n",s);
-	strcpy(s,generate_dungeon_name()->name);
-	//printf("    generated dungeon name = %s\n",s);
-	strcpy(d->name, s);
-	//printf("    copied s into d->name\n");
-	//printf("    generated name\n");
+	d->damage = (rand()%10000)/100.0;
+	d->dinge = (rand()%10000)/100.0;
+	d->haunt = (rand()%10000)/100.0;
+	d->faith = (rand()%10000)/100.0;
 
-	d->monsters = NULL;
-	//printf("    generated monsters\n");
-	
+	d->inventory = NULL;
+	//generate_inventory();
+	d->inventory = generate_inventory();
+	char s[MAX_ROOM_NAME] = "nothing";
+	strcpy(s,generate_dungeon_name()->name);
+	strcpy(d->name, s);
+	d->monsters = generate_many_monsters(rand()%4);
 	return d;
 }
 

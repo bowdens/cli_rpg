@@ -8,6 +8,7 @@
 #define ID_BACK 3
 #define ID_FOWARD 4
 #define ID_PRINT 5
+#define ID_TEST 6
 
 #define TYPE_SWORD 1
 #define TYPE_BOW 2
@@ -33,7 +34,8 @@ typedef struct inv{
 //characters (including the player and monsters
 typedef struct character{
         char name[MAX_INV_NAME];
-        double lifeTotal;
+        int level;
+	double lifeTotal;
 	double life;
 	double intelligence;
 	double strength;
@@ -51,6 +53,11 @@ typedef struct monsters{
 //the list of dungeon rooms
 typedef struct dungeon{
 	char name[MAX_ROOM_NAME];
+	double damage;
+	double dinge;
+	double haunt;
+	double faith;
+
 	Monsters *monsters;
 	Inv *inventory;
 	struct dungeon *left;
