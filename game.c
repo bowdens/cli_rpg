@@ -7,9 +7,13 @@
 
 void init_c(Commands *c){
 	c = append_command_list(c, ID_LEFT, "left", "", "try to move left");
+	c = append_command_list(c, ID_LEFT, "l", "", "shorthand for left");
 	c = append_command_list(c, ID_RIGHT, "right", "", "try to move right");
+	c = append_command_list(c, ID_RIGHT, "r", "", "shorthand for right");
 	c = append_command_list(c, ID_FOWARD, "foward", "", "try to move foward");
+	c = append_command_list(c, ID_FOWARD, "f", "", "shrothand for foward");
 	c = append_command_list(c, ID_BACK, "back", "", "try to move back");
+	c = append_command_list(c, ID_BACK, "b", "", "shorthand for back");
 	c = append_command_list(c, ID_PRINT, "print", "", "Prints the given argument. Eg 'print room'");
 	c = append_command_list(c, ID_TEST, "test", "testing rand", "tests rand()%8 * rand()%8 + rand()%6");
 }
@@ -76,6 +80,7 @@ int main(int argc, char **argv){
 	
 	printf("seed = %d\n",seed);
 	srand(seed);
+	printf("srand(%d)\n",seed);
 
 	Dungeon *d = generate_dungeon();
 	printf("generated dungeon\n");

@@ -88,7 +88,13 @@ void print_monsters(Monsters *m){
 }
 
 void print_room(Dungeon *d){
-	printf("You are in a "C_G"%s"C_W"\n",d->name);
+	printf("You are in ");
+	if(is_vowel(d->name[0])){
+		printf("an ");
+	}else{
+		printf("a ");
+	}
+	printf(C_G"%s"C_W"\n",d->name);
 	if(d->back == NULL){
 		printf("To your back there is no exit. ");
 	}else{
@@ -123,7 +129,7 @@ Inv *generate_inventory(){
 	strcpy(i->name, "testname");
 	strcpy(i->desc, "testdesc");
 	i->quantity = 2;
-	i->type = TYPE_SWORD;
+	i->type = WEAPON_SWORD;
 	i->effect = 1.2;
 	i->next = NULL;
 	return i;
@@ -158,10 +164,14 @@ char ret_v(){
 
 void generate_monster_name(int length, char str[length]){
 	for(int i = 0; i < length; i ++){
-		if(i%2){
-			str[i] = tolower(ret_c());
+		if(i%2 == 0){
+			if(i == 0){
+				str[i] = ret_c();
+			}else{
+				str[i] = tolower(ret_c());
+			}
 		}else{
-			if( i == 0){
+			if(i == 0){
 				str[i] = ret_v();
 			}else{
 				str[i] = tolower(ret_v());
@@ -195,20 +205,22 @@ int highest_dungeon_attrib(Dungeon *d){
 	if(d->damage >= d->dinge && d->damage >= d->haunt && d->damage >=d->faith){
 		return ATTRIB_DAMAGE;
 	}else if(d->dinge > d->damage && d->dinge > d->haunt && d->damage > d->faith){
-		return ATTRIB_DINGE
+		return ATTRIB_DINGE;
 	}else if(d->haunt > d->damage && d->haunt > d->dinge && d->haunt > d->faith){
-		return ATTRB_HAUNT;
+		return ATTRIB_HAUNT;
 	}else{
 		return ATTRIB_FAITH;
 	}
 }
 
-#define MAX_RM_SUBNAME 64
-Clist create_clist(char text[64]){
+
+Clist *create_clist(char text[64]){
+	if(text[0] == '\0') return NULL;
 	Clist *l = malloc(sizeof(Clist));
 	assert(l);
 	l->next = NULL;
 	strcpy(l->text, text);
+	//printf("created clist node at %p with text %s\n",l, l->text);
 	return l;
 }
 
@@ -219,11 +231,12 @@ void print_clist(Clist *l){
 		if(l->next){
 			printf(",");
 		}
+		l = l->next;
 	}
 	printf("]");
 }
 
-int *clist_length(Clist *l){
+int clist_length(Clist *l){
 	int c = 0;
 	while(l){
 		c ++;
@@ -233,21 +246,43 @@ int *clist_length(Clist *l){
 }
 
 Clist *read_subn(char *loc){
+	//printf("\topening file %s\n",loc);
 	FILE *f = fopen(loc, "r");
-	char buffer[MAX_RM_SUBNAME] = {0};
+	char buffer[MAX_ROOM_SUBNAME] = {0};
+
 	Clist *l;
 	Clist *head;
 
-	if(fgets(buffer, MAX_RM_SUBNAME, f)){
+	if(f == NULL){
+		//printf("\tFILE %s was NULL\n",loc);
+		return NULL;
+	}
+	//first read
+	if(fgets(buffer, MAX_ROOM_SUBNAME, f)){
+		buffer[strcspn(buffer, "\n")] = 0;
 		l = create_clist(buffer);
 		head = l;
-	}else return NULL;
-
-	while(fgets(buffer, MAX_RM_SUBNAME, f)){
-		l->next = create_clist(buffer);
-		l = l->next;
+		//printf("read %s\n",buffer);
+	}else{
+		//printf("\tnothing was read from %s\n",loc);
+		return NULL;
 	}
-	print_clist(head);
+	//looping read
+	while(l!=NULL && fgets(buffer, MAX_ROOM_SUBNAME, f)!=NULL){
+		if(buffer[0] == '\n' || buffer[0] == '\0') return head;
+		//printf("    buffer had text\n");
+		buffer[strcspn(buffer, "\n")] = 0;
+		//printf("    removed trailing newline\n");
+		l->next = create_clist(buffer);
+		//printf("    set l->next to %p\n",l->next);
+		l = l->next;
+		//printf("    moving to %p\n",l);
+		//printf("     read %s\n",buffer);
+		//print_clist(head);
+	}
+	fclose(f);
+	//print_clist(head);
+	//printf("\n\thead = %p\n",head);
 	return head;
 }
 
@@ -260,76 +295,115 @@ void free_clist(Clist *l){
 	}
 }
 
-int *monster_over_level(Monsters *m, int level, char mName[MAX_CHARACTER_NAME-10]){
+int monster_over_level(Monsters *m, int level, char mName[MAX_CHARACTER_NAME-10]){
 	//replaces the name with the monster with a max level over a specified 
 	//use MAX_CHARACTER_NAME-10 since ", lair of " is 10 chars long
-	char maxName = {0};
+	//printf("monster_over_level called\n");
+	if(m == NULL) return 0;
+	//printf("\tm is not null\n");
+	//printf("\tm = %p",m);
+	//printf(", m->monster = %p\n",m->monster);
+	if(m->monster == NULL) return 0;
+	//printf("\tm->monster is not null\n");
+	//printf("\tentering monster over level\n");
+
+	char maxName[MAX_CHARACTER_NAME-10] = {0};
 	int maxLevel = level - 1;
 	int replaced = 0;
+	//printf("\tvariavles init\n");
+	
 	while(m && m->monster){
-		if(m->monster->level > maxLevel){
+		//printf("\tlooping through monster\n");
+		if(m && m->monster && m->monster->level > maxLevel){
+			//printf("monster %s has a higher level than the previous max %d, at %d\n",m->monster->name,maxLevel, m->monster->level);
 			strcpy(maxName, m->monster->name);
 			maxLevel = m->monster->level;
 			replaced = 1;
 		}
+		m = m->next;
 	}
 	strncpy(mName,maxName, MAX_CHARACTER_NAME-10);
+	//printf("Monster over level returned, value %d\n", replaced);
 	return replaced;
 }
 
 void generate_room_name(Dungeon *d, char name[MAX_ROOM_NAME]){
+	//printf("generate_room_name called\n");
 	int high = highest_dungeon_attrib(d);
 	char prefix[MAX_ROOM_SUBNAME] = {0};
 	char room[MAX_ROOM_SUBNAME] = {0};
 	char suffix[MAX_ROOM_SUBNAME] = {0};
-	
+	//printf("\tvariables initialised\n");
 	Clist *pNames;
 	Clist *rNames;
-	Clist *sNames;
+	//printf("\tclists named\n");
+
 	int clistl = 0;
 	int r = 0;
-	switch(highest_dungeon_attrib(d)){
+	//printf("\tmore variables init\n");
+
+	switch(high){
 		case ATTRIB_DAMAGE:
 			pNames = read_subn("damage_prefix.subn");
+			//printf("\troom type: damaged\n");
 			break;
 		case ATTRIB_DINGE:
 			pNames = read_subn("dinge_prefix.subn");
+                        //printf("\troom type: dinge\n");
 			break;
-		case ATTIRB_HAUNT:
+		case ATTRIB_HAUNT:
 			pNames = read_subn("haunt_prefix.subn");
+                        //printf("\troom type: haunt\n");
 			break;
 		case ATTRIB_FAITH:
 			pNames = read_subn("faith_prefix.subn");
+                        //printf("\troom type: faith\n");
+			break;
+		default:
+			pNames = read_subn("dinge_prefix.subn");
+                        printf("\tno room type?!?\n");
 			break;
 	}
+	//printf("\tread subn\n");
 	//randomise prefix
 	clistl = clist_length(pNames);
-        r = rand()%clistl + 1;
+	//printf("\tpNames = ");
+	//print_clist(pNames);
+	//printf("\t\tlength of clist = %d\n",clistl);
+        
+	r = rand()%clistl;
         for(int i = 0; i < r && pNames; i ++) pNames = pNames->next;
-        strcpy(prefix, pNames->text);
+        //printf("looped to random pNames\n");
+	strcpy(prefix, pNames->text);
 	strcat(prefix, " ");
+	//printf("prefix: %s\n",prefix);
+	
 	//room name
 	rNames = read_subn("room_names.subn");
 	clistl = clist_length(rNames);
-	r = rand()%clistl + 1;
+	r = rand()%clistl;
 	for(int i = 0; i < r && rNames; i ++) rNames = rNames->next;
+	//printf("Looped to random rName\n");
 	strcpy(room, rNames->text);
-	
+	//printf("room: %s\n",room);
+
 	//suffix
 	char mName[MAX_CHARACTER_NAME-10] = {0};
 	if(monster_over_level(d->monsters, 30, mName)){
 		//if there is a big monster
+		//printf("creating a suffix\n");
 		strcpy(suffix, ", lair of ");
 		strcat(suffix, mName);
 	}
+	//printf("suffix: %s\n",suffix);
 
 	strcpy(name, prefix);
-	strcpy(name, room);
-	strcpy(name, suffix);
+	strcat(name, room);
+	strcat(name, suffix);
+	//printf("name: %s\n",name);
 
 	free_clist(pNames);
 	free_clist(rNames);
-	free_clist (sNames);
 }
 
 Monsters *generate_monster_list(){
@@ -355,30 +429,34 @@ Dungeon *create_room(){
 	//printf("creating a room\n");
 	Dungeon *d = malloc(sizeof(Dungeon));
 	assert(d);
-	
+	//printf("dungeon created at %p\n",d);
+
 	d->damage = (rand()%10000)/100.0;
 	d->dinge = (rand()%10000)/100.0;
 	d->haunt = (rand()%10000)/100.0;
 	d->faith = (rand()%10000)/100.0;
+	//printf("attributes created\n");
 
 	d->inventory = NULL;
 	//generate_inventory();
 	d->inventory = generate_inventory();
-	char s[MAX_ROOM_NAME] = "nothing";
-	strcpy(s,generate_dungeon_name()->name);
-	strcpy(d->name, s);
+	//printf("generated inv\n");
 	d->monsters = generate_many_monsters(rand()%4);
+	//printf("generated monster\n");
+
+	//room name must be last because it is dependant on the above features
+	generate_room_name(d, d->name);
+	//printf("generated room name = %s\n",d->name);
 	return d;
 }
 
 Dungeon *generate_room(Dungeon *d, Dungeon *back){
-	//recursively generates a dungeon
+	//printf("generating room\n");
 	if(d == NULL) return NULL;
-	
 	d->back = back;
 	
 	//create a left door
-	int r = rand()%ROOM_CO;	
+	int r = rand()%ROOM_CO;
 	if(r == 0){
 		//printf("creating door to the left\n");
 		d->left = generate_room(create_room(), d);
@@ -412,12 +490,16 @@ Dungeon *generate_room(Dungeon *d, Dungeon *back){
 Dungeon *generate_dungeon(){
 	//unsigned int seed;
 	//printf("in generate_dungeon, seed = %d\n",seed);
-	//srand(seed);
+	//printf("generating dungeon\n");
 	Dungeon *d = create_room();
+	//printf("first dungeon created\n");
 	d->back = NULL;
 	d->left = generate_room(create_room(), d);
+	//printf("left wing created\n");
 	d->right = generate_room(create_room(), d);
+	//printf("right wing created\n");
 	d->foward = generate_room(create_room(), d);
+	//printf("foward wing created\n");
 	return d;
 }
 
