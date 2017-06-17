@@ -191,131 +191,145 @@ Character *generate_monster(){
 	return m;
 }
 
-char generate_room_name(Dungeon *d, char name[MAX_ROOM_NAME]){
-	
+int highest_dungeon_attrib(Dungeon *d){
+	if(d->damage >= d->dinge && d->damage >= d->haunt && d->damage >=d->faith){
+		return ATTRIB_DAMAGE;
+	}else if(d->dinge > d->damage && d->dinge > d->haunt && d->damage > d->faith){
+		return ATTRIB_DINGE
+	}else if(d->haunt > d->damage && d->haunt > d->dinge && d->haunt > d->faith){
+		return ATTRB_HAUNT;
+	}else{
+		return ATTRIB_FAITH;
+	}
 }
 
-#define ROOM_PREFIX_NUM 49
-#define ROOM_NAME_NUM 19
-#define ROOM_SUFFIX_NUM 15
+#define MAX_RM_SUBNAME 64
+Clist create_clist(char text[64]){
+	Clist *l = malloc(sizeof(Clist));
+	assert(l);
+	l->next = NULL;
+	strcpy(l->text, text);
+	return l;
+}
 
-Nameholder *generate_dungeon_name(){
-	Nameholder *sa = malloc(sizeof(Nameholder));
-		
-	char rNames[ROOM_NAME_NUM][64] = {{0}};
-	strcpy(rNames[0], "dungeon");
-	strcpy(rNames[1], "cellar");
-	strcpy(rNames[2], "cave");
-	strcpy(rNames[3], "room");
-	strcpy(rNames[4], "hallway");
-	strcpy(rNames[5], "throne room");
-	strcpy(rNames[6], "tunnel");
-	strcpy(rNames[7], "chapel");
-	strcpy(rNames[8], "basement");
-	strcpy(rNames[9], "cavern");
-	strcpy(rNames[10], "mine shaft");
-	strcpy(rNames[11], "bridge");
-	strcpy(rNames[12], "burrow");
-	strcpy(rNames[13], "chamber");
-	strcpy(rNames[14], "crypt");
-	strcpy(rNames[15], "vault");
-	strcpy(rNames[16], "grotto");
-	strcpy(rNames[17], "den");
-	strcpy(rNames[18], "passage");
-		
-	char dNames[ROOM_SUFFIX_NUM][64] = {{0}};
-	//printf("dNames created\n");
-	strcpy(dNames[0], " of despair");
-	strcpy(dNames[1], " of misery");
-	strcpy(dNames[2], " of luck");
-	strcpy(dNames[3], " of emptiness");
-	strcpy(dNames[4], " of nothing");
-	strcpy(dNames[5], " of plenty");
-	strcpy(dNames[6], " of monsters");
-	strcpy(dNames[7], " of faith");
-	strcpy(dNames[8], " of contempt");
-	strcpy(dNames[9], " of cruelty");
-	strcpy(dNames[10], " of wrath");
-	strcpy(dNames[11], " of death");
-	strcpy(dNames[12], " of life");
-	strcpy(dNames[13], " of horror");
-	//monster suffix
-	int length = 3 + rand()%5;
-	char str[length];
-	for(int i = 0; i < length; i ++) str[i] = '\0';
-	generate_monster_name(length, str);
-	char str2[64] = " of \0";
-	strcat(str2, str);
-	strcpy(dNames[ROOM_SUFFIX_NUM - 1], str2);
+void print_clist(Clist *l){
+	printf("[");
+	while(l){
+		printf("%s",l->text);
+		if(l->next){
+			printf(",");
+		}
+	}
+	printf("]");
+}
+
+int *clist_length(Clist *l){
+	int c = 0;
+	while(l){
+		c ++;
+		l = l->next;
+	}
+	return c;
+}
+
+Clist *read_subn(char *loc){
+	FILE *f = fopen(loc, "r");
+	char buffer[MAX_RM_SUBNAME] = {0};
+	Clist *l;
+	Clist *head;
+
+	if(fgets(buffer, MAX_RM_SUBNAME, f)){
+		l = create_clist(buffer);
+		head = l;
+	}else return NULL;
+
+	while(fgets(buffer, MAX_RM_SUBNAME, f)){
+		l->next = create_clist(buffer);
+		l = l->next;
+	}
+	print_clist(head);
+	return head;
+}
+
+void free_clist(Clist *l){
+	Clist *temp;
+	while(l){
+		temp = l;
+		l = l->next;
+		free(temp);
+	}
+}
+
+int *monster_over_level(Monsters *m, int level, char mName[MAX_CHARACTER_NAME-10]){
+	//replaces the name with the monster with a max level over a specified 
+	//use MAX_CHARACTER_NAME-10 since ", lair of " is 10 chars long
+	char maxName = {0};
+	int maxLevel = level - 1;
+	int replaced = 0;
+	while(m && m->monster){
+		if(m->monster->level > maxLevel){
+			strcpy(maxName, m->monster->name);
+			maxLevel = m->monster->level;
+			replaced = 1;
+		}
+	}
+	strncpy(mName,maxName, MAX_CHARACTER_NAME-10);
+	return replaced;
+}
+
+void generate_room_name(Dungeon *d, char name[MAX_ROOM_NAME]){
+	int high = highest_dungeon_attrib(d);
+	char prefix[MAX_ROOM_SUBNAME] = {0};
+	char room[MAX_ROOM_SUBNAME] = {0};
+	char suffix[MAX_ROOM_SUBNAME] = {0};
 	
-	char pNames[ROOM_PREFIX_NUM][64] = {{0}};
-	strcpy(pNames[0], "cold ");
-	strcpy(pNames[1], "dark ");
-	strcpy(pNames[2], "stone ");
-	strcpy(pNames[3], "quiet ");
-	strcpy(pNames[4], "whispering ");
-	strcpy(pNames[5], "shabby ");
-	strcpy(pNames[6], "grimy ");
-	strcpy(pNames[7], "seedy ");
-	strcpy(pNames[8], "dim ");
-	strcpy(pNames[9], "wailing ");
-	strcpy(pNames[10], "muted ");
-	strcpy(pNames[11], "brown ");
-	strcpy(pNames[12], "white ");
-	strcpy(pNames[13], "vile ");
-	strcpy(pNames[14], "loathsome ");
-	strcpy(pNames[15], "acrid ");
-	strcpy(pNames[16], "pungent ");
-	strcpy(pNames[17], "burning ");
-	strcpy(pNames[18], "frozen ");
-	strcpy(pNames[19], "icy ");
-	strcpy(pNames[20], "frigid ");
-	strcpy(pNames[21], "hellish ");
-	strcpy(pNames[22], "sweltering ");
-	strcpy(pNames[23], "blazing ");
-	strcpy(pNames[24], "fiery ");
-	strcpy(pNames[25], "heated ");
-	strcpy(pNames[26], "rustling ");
-	strcpy(pNames[27], "howling ");
-	strcpy(pNames[28], "creaking ");
-	strcpy(pNames[29], "damaged ");
-	strcpy(pNames[30], "fractured ");
-	strcpy(pNames[31], "evil ");
-	strcpy(pNames[32], "ravaged ");
-	strcpy(pNames[33], "narrow ");
-	strcpy(pNames[34], "expansive ");
-	strcpy(pNames[35], "echoing ");	
-	strcpy(pNames[36], "large ");
-	strcpy(pNames[37], "prison ");
-	strcpy(pNames[38], "torture ");
-	strcpy(pNames[39], "abandoned ");
-	strcpy(pNames[40], "claustrophobic ");
-	strcpy(pNames[41], "slimy ");
-	strcpy(pNames[42], "damp ");
-	strcpy(pNames[43], "unused ");
-	strcpy(pNames[44], "defunct ");
-	strcpy(pNames[45], "lifeless ");
-	strcpy(pNames[46], "breathless ");
-	strcpy(pNames[47], "drab ");
-	strcpy(pNames[48], "faded ");
-
-	char prefix[64] = {0};
-	strcpy(prefix, pNames[rand()%ROOM_PREFIX_NUM]);
-	if(rand()%4 == 0){
-		prefix[0] = '\0';
+	Clist *pNames;
+	Clist *rNames;
+	Clist *sNames;
+	int clistl = 0;
+	int r = 0;
+	switch(highest_dungeon_attrib(d)){
+		case ATTRIB_DAMAGE:
+			pNames = read_subn("damage_prefix.subn");
+			break;
+		case ATTRIB_DINGE:
+			pNames = read_subn("dinge_prefix.subn");
+			break;
+		case ATTIRB_HAUNT:
+			pNames = read_subn("haunt_prefix.subn");
+			break;
+		case ATTRIB_FAITH:
+			pNames = read_subn("faith_prefix.subn");
+			break;
+	}
+	//randomise prefix
+	clistl = clist_length(pNames);
+        r = rand()%clistl + 1;
+        for(int i = 0; i < r && pNames; i ++) pNames = pNames->next;
+        strcpy(prefix, pNames->text);
+	strcat(prefix, " ");
+	//room name
+	rNames = read_subn("room_names.subn");
+	clistl = clist_length(rNames);
+	r = rand()%clistl + 1;
+	for(int i = 0; i < r && rNames; i ++) rNames = rNames->next;
+	strcpy(room, rNames->text);
+	
+	//suffix
+	char mName[MAX_CHARACTER_NAME-10] = {0};
+	if(monster_over_level(d->monsters, 30, mName)){
+		//if there is a big monster
+		strcpy(suffix, ", lair of ");
+		strcat(suffix, mName);
 	}
 
-	char room[64] = {0};
-	strcpy(room, rNames[rand()%ROOM_NAME_NUM]);
-	char suffix[64] = {0};
-	strcpy(suffix, dNames[rand()%ROOM_SUFFIX_NUM]);
-	if(rand()%2 == 0){
-		suffix[0] = '\0';
-	}
-	char *name = strcat(prefix, room);
-	name = strcat(name, suffix);
-	strcpy(sa->name, name);
-	return sa;	
+	strcpy(name, prefix);
+	strcpy(name, room);
+	strcpy(name, suffix);
+
+	free_clist(pNames);
+	free_clist(rNames);
+	free_clist (sNames);
 }
 
 Monsters *generate_monster_list(){
