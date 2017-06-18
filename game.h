@@ -14,6 +14,10 @@
 #define ID_FOWARD 4
 #define ID_PRINT 5
 #define ID_TEST 6
+#define ID_A 7
+#define ID_B 8
+#define ID_C 9
+#define ID_D 10
 
 #define WEAPON_SWORD 1
 #define WEAPON_BOW 2
@@ -21,6 +25,7 @@
 #define WEAPON_POTION 4
 #define WEAPON_GOLD 5
 
+#define ATTRIB_NONE 0
 #define ATTRIB_DAMAGE 1
 #define ATTRIB_DINGE 2
 #define ATTRIB_HAUNT 3
@@ -42,7 +47,7 @@ typedef struct inv{
 } Inv;
 
 typedef struct dialogue{
-	char dialogue[MAX_DIALOGUE];
+	char text[MAX_DIALOGUE];
 	
 	char optionAText[MAX_DIALOGUE_TEXT];
 	char optionBText[MAX_DIALOGUE_TEXT];
@@ -113,5 +118,7 @@ void print_world(Dungeon *d, int in);
 void print_room(Dungeon *d);
 
 void print_monsters(Monsters *m);
+
+void print_dialogue(Dialogue *d);
 
 int count_rooms(Dungeon *d, int c);

@@ -84,7 +84,26 @@ void print_monsters(Monsters *m){
 			printf("%s\t(level %d)\n\t%.1lf/%.1lf\n",m->monster->name, m->monster->level,m->monster->life, m->monster->lifeTotal);
 		}
 		m = m->next;
-	}	
+		}	
+}
+
+void print_dialogue(Dialogue *d){
+	//printf("printing dialogue\n");
+	if(d == NULL) return;
+	
+	printf("$ %s\n",d->text);
+	if(d->optionAText[0] != '\0'){
+		printf("\tA: %s\n",d->optionAText);
+	}
+	if(d->optionBText[0] != '\0'){
+		printf("\tB: %s\n",d->optionBText);
+	}
+	if(d->optionCText[0] != '\0'){
+		printf("\tC: %s\n",d->optionCText);
+	}
+	if(d->optionDText[0] != '\0'){
+		printf("\tD: %s\n",d->optionDText);
+	}
 }
 
 void print_room(Dungeon *d){
@@ -95,6 +114,16 @@ void print_room(Dungeon *d){
 		printf("a ");
 	}
 	printf(C_G"%s"C_W"\n",d->name);
+	
+	/*printf("Its attributes include:\n");
+	printf("damage:\t%.2lf\n",d->damage);
+	printf("dinge:\t%.2lf\n",d->dinge);
+	printf("haunt:\t%.2lf\n",d->haunt);
+	printf("faith:\t%.2lf\n",d->faith);
+	*/
+	
+	//print_dialogue(d->monsters->monster->dialogue);
+
 	if(d->back == NULL){
 		printf("To your back there is no exit. ");
 	}else{
@@ -118,6 +147,9 @@ void print_room(Dungeon *d){
 	}else{
 		printf("\nThere are %d "C_R"monsters"C_W" in this room, they are:\n", count_monsters(d->monsters));
 		print_monsters(d->monsters);
+	}
+	if(d->monsters && d->monsters->monster && d->monsters->monster->dialogue){
+		print_dialogue(d->monsters->monster->dialogue);
 	}
 }
 
@@ -183,6 +215,12 @@ void generate_monster_name(int length, char str[length]){
 	//return str;
 }
 
+Dialogue *create_dialogue(){
+	Dialogue *d = malloc(sizeof(Dialogue));
+	assert(d);
+	return d;
+}
+
 Character *generate_monster(){
 	Character *m = malloc(sizeof(Character));
 	assert(m);
@@ -192,24 +230,40 @@ Character *generate_monster(){
 	//printf("Monster name generated: %s\n",m->name);
 	int r1 = rand()%8 + 1;
 	int r2 = rand()%8 + 1;
-	int r3 = rand()%7;
+	int r3 = 0;//rand()%7;
 	m->level = r1 * r2 + r3; //generates a random number between 0 and 70, with a bias to lower numbers
 	//printf("Monster %s's level = %d\n",m->name, m->level);
 	m->lifeTotal = m->level * 10 + rand()%10;
 	m->life = m->lifeTotal;
 	m->inventory = NULL;
+	
+	m->dialogue = create_dialogue();
+	
+	//printf("    generating dialogue\n");
+	strcpy(m->dialogue->text, "I am ");
+	//printf("    initial dialgoue generated\n");
+	strcat(m->dialogue->text, m->name);
+	//printf("    name added\n");
+	strcat(m->dialogue->text, ", fear me!");
+	//printf("    dialogue generated\n");
+	strcpy(m->dialogue->optionAText, "yes you are");
+	strcpy(m->dialogue->optionBText, "I am not afraid");
+	strcpy(m->dialogue->optionCText, "Who?");
+	strcpy(m->dialogue->optionDText, "ok");
 	return m;
 }
 
-int highest_dungeon_attrib(Dungeon *d){
-	if(d->damage >= d->dinge && d->damage >= d->haunt && d->damage >=d->faith){
+int highest_dungeon_attrib(Dungeon *d, double minAttrib){
+	if(d->damage >= d->dinge && d->damage >= d->haunt && d->damage >=d->faith && d->damage > minAttrib){
 		return ATTRIB_DAMAGE;
-	}else if(d->dinge > d->damage && d->dinge > d->haunt && d->damage > d->faith){
+	}else if(d->dinge > d->damage && d->dinge > d->haunt && d->dinge > d->faith && d->dinge > minAttrib){
 		return ATTRIB_DINGE;
-	}else if(d->haunt > d->damage && d->haunt > d->dinge && d->haunt > d->faith){
+	}else if(d->haunt > d->damage && d->haunt > d->dinge && d->haunt > d->faith && d->haunt > minAttrib){
 		return ATTRIB_HAUNT;
-	}else{
+	}else if(d->faith > d->damage && d->faith > d->dinge && d->faith > d->haunt && d->faith > minAttrib){ 
 		return ATTRIB_FAITH;
+	}else{
+		return ATTRIB_NONE;
 	}
 }
 
@@ -329,7 +383,7 @@ int monster_over_level(Monsters *m, int level, char mName[MAX_CHARACTER_NAME-10]
 
 void generate_room_name(Dungeon *d, char name[MAX_ROOM_NAME]){
 	//printf("generate_room_name called\n");
-	int high = highest_dungeon_attrib(d);
+	int high = highest_dungeon_attrib(d, 60);
 	char prefix[MAX_ROOM_SUBNAME] = {0};
 	char room[MAX_ROOM_SUBNAME] = {0};
 	char suffix[MAX_ROOM_SUBNAME] = {0};
@@ -360,8 +414,8 @@ void generate_room_name(Dungeon *d, char name[MAX_ROOM_NAME]){
                         //printf("\troom type: faith\n");
 			break;
 		default:
-			pNames = read_subn("dinge_prefix.subn");
-                        printf("\tno room type?!?\n");
+			pNames = read_subn("none_prefix.subn");
+                        //printf("\tno room type!\n");
 			break;
 	}
 	//printf("\tread subn\n");

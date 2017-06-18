@@ -22,7 +22,7 @@ int power_of_two(int x){
 //input string, returns string with rANdOmUPPErcAse
 void random_case_string(char *c){
 	if(c == NULL) return;
-	for(int i = 0; i < strlen(c) + 1; i ++){
+	for(int i = 0; i < (int)strlen(c) + 1; i ++){
 		c[i] = random_case(c[i]);
 	}
 }

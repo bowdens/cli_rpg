@@ -13,9 +13,11 @@ void init_c(Commands *c){
 	c = append_command_list(c, ID_FOWARD, "foward", "", "try to move foward");
 	c = append_command_list(c, ID_FOWARD, "f", "", "shrothand for foward");
 	c = append_command_list(c, ID_BACK, "back", "", "try to move back");
-	c = append_command_list(c, ID_BACK, "b", "", "shorthand for back");
 	c = append_command_list(c, ID_PRINT, "print", "", "Prints the given argument. Eg 'print room'");
-	c = append_command_list(c, ID_TEST, "test", "testing rand", "tests rand()%8 * rand()%8 + rand()%6");
+	c = append_command_list(c, ID_A, "a", "", "selects the response A for dialogue");
+	c = append_command_list(c, ID_B, "b", "", "selects the response B for dialogue");
+	c = append_command_list(c, ID_C, "c", "", "selects the response C for dialogue");
+	c = append_command_list(c, ID_D, "d", "", "selects the response D for dialogue");
 }
 
 Dungeon *move(Dungeon *d, int moveId){
@@ -112,25 +114,45 @@ int main(int argc, char **argv){
 				}else{
 					printf("Please specify an argument eg 'print world'\n");
 				}
+				break;					
+			case ID_A :
+				if(d && d->monsters && d->monsters->monster && d->monsters->monster->dialogue &&  d->monsters->monster->dialogue->optionAText[0] != '\0'){
+					printf("%s\n",d->monsters->monster->dialogue->optionAText);
+					d->monsters->monster->dialogue = d->monsters->monster->dialogue->optionA;
+					print_dialogue(d->monsters->monster->dialogue);
+				}else{
+					printf("there is no option A\n");
+				}
 				break;
-			case ID_TEST :
-				printf("testing\n");
-				int l = 10;
-				if(a->next){
-					if(atoi(a->next->arg) > 0){
-						l = atoi(a->next->arg);
-					}
-				}
-				int total = 0;
-				for(int i = 0; i  < l; i ++){
-					int r1 = rand()%8;
-					int r2 = rand()%8;
-					int r3 = rand()%6;
-					int r = r1 * r2 + r3;
-					printf("%d: %d x %d + %d = %d\n",i,r1, r2, r3, r);
-					total += r;
-				}
-				printf("average = %.3lf\n",(double)total/l);
+                        case ID_B :
+                                if(d && d->monsters && d->monsters->monster && d->monsters->monster->dialogue && d->monsters->monster->dialogue->optionBText[0] != '\0'){
+                                        printf("%s\n",d->monsters->monster->dialogue->optionBText);
+                                        d->monsters->monster->dialogue = d->monsters->monster->dialogue->optionB;
+                                        print_dialogue(d->monsters->monster->dialogue);
+                                }else{
+                                        printf("there is no option B\n");
+                                }
+                                break;
+                        case ID_C :
+                                if(d && d->monsters && d->monsters->monster && d->monsters->monster->dialogue && d->monsters->monster->dialogue->optionCText[0] != '\0'){
+                                        printf("%s\n",d->monsters->monster->dialogue->optionCText);
+                                        d->monsters->monster->dialogue = d->monsters->monster->dialogue->optionC;
+                                        print_dialogue(d->monsters->monster->dialogue);
+                                }else{
+                                        printf("there is no option C\n");
+                                }
+                                break;
+                        case ID_D :
+                                if(d && d->monsters && d->monsters->monster && d->monsters->monster->dialogue && d->monsters->monster->dialogue->optionDText[0] != '\0'){
+                                        printf("%s\n",d->monsters->monster->dialogue->optionDText);
+                                        d->monsters->monster->dialogue = d->monsters->monster->dialogue->optionD;
+                                        print_dialogue(d->monsters->monster->dialogue);
+                                }else{
+                                        printf("there is no option D\n");
+                                }
+                                break;
+
+
 
 		}	
 	}
