@@ -19,11 +19,11 @@
 #define ID_C 9
 #define ID_D 10
 
-#define WEAPON_SWORD 1
-#define WEAPON_BOW 2
-#define WEAPON_RING 3
-#define WEAPON_POTION 4
-#define WEAPON_GOLD 5
+#define ITEM_SWORD 1
+#define ITEM_BOW 2
+#define ITEM_RING 3
+#define ITEM_POTION 4
+#define ITEM_GOLD 5
 
 #define ATTRIB_NONE 0
 #define ATTRIB_DAMAGE 1
@@ -120,5 +120,7 @@ void print_room(Dungeon *d);
 void print_monsters(Monsters *m);
 
 void print_dialogue(Dialogue *d);
+
+void print_inv(Inv *i);
 
 int count_rooms(Dungeon *d, int c);

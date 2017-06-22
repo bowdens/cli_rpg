@@ -11,7 +11,7 @@ void init_c(Commands *c){
 	c = append_command_list(c, ID_RIGHT, "right", "", "try to move right");
 	c = append_command_list(c, ID_RIGHT, "r", "", "shorthand for right");
 	c = append_command_list(c, ID_FOWARD, "foward", "", "try to move foward");
-	c = append_command_list(c, ID_FOWARD, "f", "", "shrothand for foward");
+	c = append_command_list(c, ID_FOWARD, "f", "", "shorthand for foward");
 	c = append_command_list(c, ID_BACK, "back", "", "try to move back");
 	c = append_command_list(c, ID_PRINT, "print", "", "Prints the given argument. Eg 'print room'");
 	c = append_command_list(c, ID_A, "a", "", "selects the response A for dialogue");
@@ -67,6 +67,7 @@ int main(int argc, char **argv){
 
 	Arg *a = malloc(sizeof(Arg));
 	assert(a);
+	a->id = 0;
 	printf("allocated argument memory\n");
 
 	unsigned int seed = time(NULL);
@@ -88,10 +89,14 @@ int main(int argc, char **argv){
 	printf("generated dungeon\n");
 	Dungeon *start = d;
 	printf("designated starting room\n");
+	Character *p = generate_player();
+	printf("Character generated\n");
 	printf("This world has %d rooms\n", count_rooms(start, 0));
 	while(1){
 		printf("\n\n");
-		print_room(d);
+		if(a->id == 0 || a->id == ID_LEFT || a->id == ID_RIGHT || a->id == ID_FOWARD || a->id == ID_BACK){
+			print_room(d);
+		}
 		a = get_input(c,a);
 		if(a == NULL) return 1;
 		int id = a->id;
@@ -107,9 +112,11 @@ int main(int argc, char **argv){
 						print_world(start, 0);
 					}else if(strcmp(a->next->arg, "room") == 0){
 						print_room(d);
+					}else if(strcmp(a->next->arg, "inv") == 0){
+						print_inv(p->inventory);
 					}else{
 						//there is no matching argument to be printed
-						printf("That cannot be printed\n");
+						printf("That cannot be printed\nPlease choose from 'world', 'room', and 'inv'\n");
 					}
 				}else{
 					printf("Please specify an argument eg 'print world'\n");

@@ -42,6 +42,40 @@ void pr_i(int in){
 	}
 }
 
+void print_inv(Inv *i){
+	while(i){
+		printf("%s\tTYPE: ",i->name);
+		switch(i->type){
+			case ITEM_SWORD:
+				printf("sword");
+				break;
+			case ITEM_BOW:
+				printf("bow");
+				break;
+			case ITEM_RING:
+				printf("ring");
+				break;
+			case ITEM_GOLD:
+				printf("gold");
+				break;
+			case ITEM_POTION:
+				printf("potion");
+				break;
+		}
+		printf("\n");
+		printf("\tQuantity: %d\n",i->quantity);
+		printf("\t%s\n",i->desc);
+		if(i->type == ITEM_SWORD){
+			printf("\tDamage: %.1lf\n",i->effect);
+		}else if(i->type == ITEM_BOW){
+			printf("\tRanged damage: %.0lf\n",i->effect);
+		}else if(i->type == ITEM_POTION){
+			printf("\tHealing ability: %0.lf\n",i->effect);
+		}
+		i = i->next;
+	}
+}
+
 void print_world(Dungeon *d, int in){
 	if(d == NULL) return;
 	//if(in == 0) printf("number of rooms = %d\n",count_rooms(d, 0));
@@ -153,17 +187,21 @@ void print_room(Dungeon *d){
 	}
 }
 
-
-Inv *generate_inventory(){
+Inv *create_inv(){
 	Inv *i = malloc(sizeof(Inv));
 	assert(i);
-
-	strcpy(i->name, "testname");
-	strcpy(i->desc, "testdesc");
-	i->quantity = 2;
-	i->type = WEAPON_SWORD;
-	i->effect = 1.2;
 	i->next = NULL;
+	return i;
+}
+
+Inv *generate_inventory(){
+	Inv *i = create_inv();
+
+	strcpy(i->name, "Rusty Sword");
+	strcpy(i->desc, "Its rusty but at least its better than your bare hands.");
+	i->quantity = 1;
+	i->type = ITEM_SWORD;
+	i->effect = 1.2;
 	return i;
 }
 
@@ -218,8 +256,62 @@ void generate_monster_name(int length, char str[length]){
 Dialogue *create_dialogue(){
 	Dialogue *d = malloc(sizeof(Dialogue));
 	assert(d);
+	d->optionA = NULL;
+	d->optionB = NULL;
+	d->optionC = NULL;
+	d->optionD = NULL;
 	return d;
 }
+
+Dialogue *generate_dialogue(char *name){
+	Dialogue *d = create_dialogue();
+	
+	strcpy(d->text, "I am ");
+	strcat(d->text, name);
+	strcat(d->text, ", fear me!");
+	
+	strcpy(d->optionAText, "Please. Let me live!");
+
+	strcpy(d->optionBText, "No, ");
+	strcat(d->optionBText, name);
+	strcat(d->optionBText, ", fear me!");
+
+	strcpy(d->optionCText, "I am unimpressed");
+
+
+	strcpy(d->optionDText, "I will fight you to the death!");
+	
+	d->optionD = create_dialogue();
+	strcpy(d->optionD->text, "So be it!");
+
+	d->optionA = create_dialogue();
+	strcpy(d->optionA->text, "Hahaha, not likely, fool!");
+	
+	d->optionB = create_dialogue();
+	strcpy(d->optionB->text, "Arrogant creature, prepare yourself for battle!");
+	
+	d->optionC = create_dialogue();
+	strcpy(d->optionC->text, "And I am unimpressed by you. Now face me in combat!");
+	return d;
+}
+
+/*Character *generate_player(){
+	Character *p = malloc(sizeof(Character));
+	assert(p);
+
+	char name[MAX_CHARACTER_NAME] = {0};
+	printf("Enter you character's name: ");
+	fgets(name, MAX_CHARACTER_NAME, stdin);
+
+	int i = 0;
+	while(i < MAX_CHARACTER_NAME && name[i] != '\0'){
+		if(name[i] == '\n') name[i] = '\0';
+	}
+
+	strcpy(p->name, name);
+	
+	return p;
+}*/
 
 Character *generate_monster(){
 	Character *m = malloc(sizeof(Character));
@@ -237,19 +329,8 @@ Character *generate_monster(){
 	m->life = m->lifeTotal;
 	m->inventory = NULL;
 	
-	m->dialogue = create_dialogue();
+	m->dialogue = generate_dialogue(m->name);
 	
-	//printf("    generating dialogue\n");
-	strcpy(m->dialogue->text, "I am ");
-	//printf("    initial dialgoue generated\n");
-	strcat(m->dialogue->text, m->name);
-	//printf("    name added\n");
-	strcat(m->dialogue->text, ", fear me!");
-	//printf("    dialogue generated\n");
-	strcpy(m->dialogue->optionAText, "yes you are");
-	strcpy(m->dialogue->optionBText, "I am not afraid");
-	strcpy(m->dialogue->optionCText, "Who?");
-	strcpy(m->dialogue->optionDText, "ok");
 	return m;
 }
 
@@ -480,7 +561,7 @@ Monsters *generate_many_monsters(int num){
 }
 
 Dungeon *create_room(){
-	//printf("creating a room\n");
+	printf("\tcreating a room\n");
 	Dungeon *d = malloc(sizeof(Dungeon));
 	assert(d);
 	//printf("dungeon created at %p\n",d);
@@ -489,14 +570,14 @@ Dungeon *create_room(){
 	d->dinge = (rand()%10000)/100.0;
 	d->haunt = (rand()%10000)/100.0;
 	d->faith = (rand()%10000)/100.0;
-	//printf("attributes created\n");
+	printf("\t\tattributes created\n");
 
 	d->inventory = NULL;
 	//generate_inventory();
 	d->inventory = generate_inventory();
-	//printf("generated inv\n");
+	printf("\t\tgenerated inv\n");
 	d->monsters = generate_many_monsters(rand()%4);
-	//printf("generated monster\n");
+	printf("\t\tgenerated monster\n");
 
 	//room name must be last because it is dependant on the above features
 	generate_room_name(d, d->name);
@@ -505,12 +586,13 @@ Dungeon *create_room(){
 }
 
 Dungeon *generate_room(Dungeon *d, Dungeon *back){
-	//printf("generating room\n");
+	printf("generating room\n");
 	if(d == NULL) return NULL;
 	d->back = back;
 	
 	//create a left door
 	int r = rand()%ROOM_CO;
+	printf("\tr = %d\n",r);
 	if(r == 0){
 		//printf("creating door to the left\n");
 		d->left = generate_room(create_room(), d);
@@ -520,7 +602,7 @@ Dungeon *generate_room(Dungeon *d, Dungeon *back){
 	
 	//create a right door
 	r = rand()%ROOM_CO;
-        //printf("r = %d\n",r);
+        printf("\tr = %d\n",r);
         if(r == 0){
 		//printf("creating door to the right\n");
 		d->right = generate_room(create_room(), d);
@@ -530,7 +612,7 @@ Dungeon *generate_room(Dungeon *d, Dungeon *back){
 	
 	//create a foward door
 	r = rand()%ROOM_CO;
-        //printf("r = %d\n",r);
+        printf("\tr = %d\n",r);
         if(r == 0){
 		//printf("creating door to the front\n");
 		d->foward = generate_room(create_room(), d);
@@ -544,16 +626,16 @@ Dungeon *generate_room(Dungeon *d, Dungeon *back){
 Dungeon *generate_dungeon(){
 	//unsigned int seed;
 	//printf("in generate_dungeon, seed = %d\n",seed);
-	//printf("generating dungeon\n");
+	printf("generating dungeon\n");
 	Dungeon *d = create_room();
-	//printf("first dungeon created\n");
+	printf("first dungeon created\n");
 	d->back = NULL;
 	d->left = generate_room(create_room(), d);
-	//printf("left wing created\n");
+	printf("left wing created\n");
 	d->right = generate_room(create_room(), d);
-	//printf("right wing created\n");
+	printf("right wing created\n");
 	d->foward = generate_room(create_room(), d);
-	//printf("foward wing created\n");
+	printf("foward wing created\n");
 	return d;
 }
 
@@ -562,14 +644,28 @@ Character *generate_player(){
 	Character *p = malloc(sizeof(Character));
 	assert(p);
 
-	p->inventory = malloc(sizeof(Inv));
+	p->inventory = generate_inventory();
 	p->lifeTotal = 100;
-	p->life = 90;
-	p->intelligence = 1;
-	p->strength = 10;
-	p->charisma = 5;
-	p->luck = 9;
-	strcpy(p->name, "tom");
+	p->life = rand()%((int)p->lifeTotal/10) + p->lifeTotal * 0.9;
+	p->intelligence = rand()%10;
+	p->strength = rand()%10;
+	p->charisma = rand()%10;
+	p->luck = rand()%10;
+	
+        char name[MAX_CHARACTER_NAME] = {0};
+        printf("Enter you character's name: ");
+        fgets(name, MAX_CHARACTER_NAME, stdin);
+
+        int i = 0;
+        while(i < MAX_CHARACTER_NAME && name[i] != '\0'){
+                if(name[i] == '\n'){
+			name[i] = '\0';
+			break;
+		}
+		i++;
+        }
+
+        strcpy(p->name, name);
 
 	return p;
 }

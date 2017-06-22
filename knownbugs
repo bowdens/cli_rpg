@@ -2,3 +2,5 @@
 	> Occurs on ./game 5
 	> FIXED: Occured when print dialogue was called without checking whether the monsters existed
 2. floating point error sometimes, believed to be to do with the srand?
+	> Occurs on ./game 1498026964.
+	> No longer think it is to do with srand.
