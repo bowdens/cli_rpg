@@ -1,3 +1,4 @@
+//Maximum string lengths
 #define MAX_ROOM_NAME 256
 #define MAX_CHARACTER_NAME 64
 #define MAX_INV_NAME 64
@@ -8,6 +9,7 @@
 #define MAX_ROOM_SUBNAME 64
 #define MAX_ROOM_SUBNAME 64
 
+//Command IDs
 #define ID_LEFT 1
 #define ID_RIGHT 2
 #define ID_BACK 3
@@ -19,20 +21,28 @@
 #define ID_C 9
 #define ID_D 10
 
+//Item IDs
 #define ITEM_SWORD 1
 #define ITEM_BOW 2
 #define ITEM_RING 3
 #define ITEM_POTION 4
 #define ITEM_GOLD 5
 
+//Room Attributes
 #define ATTRIB_NONE 0
 #define ATTRIB_DAMAGE 1
 #define ATTRIB_DINGE 2
 #define ATTRIB_HAUNT 3
 #define ATTRIB_FAITH 4
 
-//GLOBAL VARIABLES
-extern unsigned int seed;
+//colour definitions
+#define C_R "\x1b[31m"
+#define C_G   "\x1b[32m"
+#define C_Y  "\x1b[33m"
+#define C_B    "\x1b[34m"
+#define C_M "\x1b[35m"
+#define C_C "\x1b[36m"
+#define C_W   "\x1b[0m" 
 
 //STRUCTS
 
@@ -122,5 +132,7 @@ void print_monsters(Monsters *m);
 void print_dialogue(Dialogue *d);
 
 void print_inv(Inv *i);
+
+void print_character(Character *p);
 
 int count_rooms(Dungeon *d, int c);

@@ -114,9 +114,11 @@ int main(int argc, char **argv){
 						print_room(d);
 					}else if(strcmp(a->next->arg, "inv") == 0){
 						print_inv(p->inventory);
+					}else if(strcmp(a->next->arg, p->name) == 0){
+						print_character(p);
 					}else{
 						//there is no matching argument to be printed
-						printf("That cannot be printed\nPlease choose from 'world', 'room', and 'inv'\n");
+						printf("That cannot be printed\nPlease choose from 'world', 'room', '%s', and 'inv'\n",p->name);
 					}
 				}else{
 					printf("Please specify an argument eg 'print world'\n");

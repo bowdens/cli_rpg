@@ -3,4 +3,6 @@
 	> FIXED: Occured when print dialogue was called without checking whether the monsters existed
 2. floating point error sometimes, believed to be to do with the srand?
 	> Occurs on ./game 1498026964.
+		- No longers occurs on ./game 149... I suspect this bug is still out there somewhere but the chaning of the order of code or something no longer causes the error.
+	> Something to do with a randomly generated number resulting in a division by zero? or a mod by zero?
 	> No longer think it is to do with srand.

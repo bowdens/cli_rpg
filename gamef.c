@@ -8,15 +8,8 @@
 #include "tomlib.h"
 #include <ctype.h>
 
+// 1/ROOM_CO chance of generating a room to the left/right/foward
 #define ROOM_CO 3
-
-#define C_R "\x1b[31m"
-#define C_G   "\x1b[32m"
-#define C_Y  "\x1b[33m"
-#define C_B    "\x1b[34m"
-#define C_M "\x1b[35m"
-#define C_C "\x1b[36m"
-#define C_W   "\x1b[0m" 
 
 typedef struct nameholder{
 	char name[MAX_ROOM_NAME];
@@ -34,7 +27,7 @@ int count_rooms(Dungeon *d, int c){
 
 void pr_i(int in){
 	for(int i = 0; i < in; i ++){
-		if(i%4 == 0){
+		if(i%2 == 0){
 			printf("|");
 		}else{
 			printf(" ");
@@ -42,35 +35,46 @@ void pr_i(int in){
 	}
 }
 
+void print_character(Character *p){
+	printf(C_B"%s"C_W" %.1lf/%.1lf\n",p->name, p->life, p->lifeTotal);
+	printf("\tIntelligence: "C_Y"%.1lf\n"C_W,p->intelligence);
+	printf("\tStrength: "C_Y"%.1lf\n"C_W,p->strength);
+	printf("\tSpeed: "C_Y"%.1lf\n"C_W,p->speed);
+	printf("\tCharisma: "C_Y"%.1lf\n"C_W,p->charisma);
+	printf("\tLuck: "C_Y"%.1lf\n"C_W,p->luck);
+	printf("You are carrying:\n");
+	print_inv(p->inventory);
+}
+
 void print_inv(Inv *i){
 	while(i){
-		printf("%s\tTYPE: ",i->name);
+		printf(C_B"%s"C_W"\tTYPE: ",i->name);
 		switch(i->type){
 			case ITEM_SWORD:
-				printf("sword");
+				printf(C_R"sword"C_W);
 				break;
 			case ITEM_BOW:
-				printf("bow");
+				printf(C_R"bow"C_W);
 				break;
 			case ITEM_RING:
-				printf("ring");
+				printf(C_C"ring"C_W);
 				break;
 			case ITEM_GOLD:
-				printf("gold");
+				printf(C_Y"gold"C_W);
 				break;
 			case ITEM_POTION:
-				printf("potion");
+				printf(C_G"potion"C_W);
 				break;
 		}
 		printf("\n");
-		printf("\tQuantity: %d\n",i->quantity);
+		printf("\tQuantity: "C_Y"%d\n"C_W,i->quantity);
 		printf("\t%s\n",i->desc);
 		if(i->type == ITEM_SWORD){
-			printf("\tDamage: %.1lf\n",i->effect);
+			printf("\tDamage: "C_R"%.1lf\n"C_W,i->effect);
 		}else if(i->type == ITEM_BOW){
-			printf("\tRanged damage: %.0lf\n",i->effect);
+			printf("\tRanged damage: "C_R"%.0lf\n"C_W,i->effect);
 		}else if(i->type == ITEM_POTION){
-			printf("\tHealing ability: %0.lf\n",i->effect);
+			printf("\tHealing ability: "C_R"%0.lf\n"C_W,i->effect);
 		}
 		i = i->next;
 	}
@@ -84,19 +88,19 @@ void print_world(Dungeon *d, int in){
 	printf(C_G "%s "C_W"\n",d->name);
 	
 	if(d->left){
-		pr_i(4*(in+1));
+		pr_i(2*(in+1));
 		printf("L:");
 		print_world(d->left, in + 1);
 	}
 
 	if(d->right){
-		pr_i(4*(in+1));
+		pr_i(2*(in+1));
 		printf("R:");
 		print_world(d->right, in + 1);
 	}
 
 	if(d->foward){
-		pr_i(4*(in+1));
+		pr_i(2*(in+1));
 		printf("F:");
 		print_world(d->foward, in + 1);
 	}
@@ -561,7 +565,7 @@ Monsters *generate_many_monsters(int num){
 }
 
 Dungeon *create_room(){
-	printf("\tcreating a room\n");
+	//printf("\tcreating a room\n");
 	Dungeon *d = malloc(sizeof(Dungeon));
 	assert(d);
 	//printf("dungeon created at %p\n",d);
@@ -570,14 +574,14 @@ Dungeon *create_room(){
 	d->dinge = (rand()%10000)/100.0;
 	d->haunt = (rand()%10000)/100.0;
 	d->faith = (rand()%10000)/100.0;
-	printf("\t\tattributes created\n");
+	//printf("\t\tattributes created\n");
 
 	d->inventory = NULL;
 	//generate_inventory();
 	d->inventory = generate_inventory();
-	printf("\t\tgenerated inv\n");
+	//printf("\t\tgenerated inv\n");
 	d->monsters = generate_many_monsters(rand()%4);
-	printf("\t\tgenerated monster\n");
+	//printf("\t\tgenerated monster\n");
 
 	//room name must be last because it is dependant on the above features
 	generate_room_name(d, d->name);
@@ -586,13 +590,13 @@ Dungeon *create_room(){
 }
 
 Dungeon *generate_room(Dungeon *d, Dungeon *back){
-	printf("generating room\n");
+	//printf("generating room\n");
 	if(d == NULL) return NULL;
 	d->back = back;
 	
 	//create a left door
 	int r = rand()%ROOM_CO;
-	printf("\tr = %d\n",r);
+	//printf("\tr = %d\n",r);
 	if(r == 0){
 		//printf("creating door to the left\n");
 		d->left = generate_room(create_room(), d);
@@ -602,7 +606,7 @@ Dungeon *generate_room(Dungeon *d, Dungeon *back){
 	
 	//create a right door
 	r = rand()%ROOM_CO;
-        printf("\tr = %d\n",r);
+        //printf("\tr = %d\n",r);
         if(r == 0){
 		//printf("creating door to the right\n");
 		d->right = generate_room(create_room(), d);
@@ -612,7 +616,7 @@ Dungeon *generate_room(Dungeon *d, Dungeon *back){
 	
 	//create a foward door
 	r = rand()%ROOM_CO;
-        printf("\tr = %d\n",r);
+        //printf("\tr = %d\n",r);
         if(r == 0){
 		//printf("creating door to the front\n");
 		d->foward = generate_room(create_room(), d);
@@ -626,16 +630,16 @@ Dungeon *generate_room(Dungeon *d, Dungeon *back){
 Dungeon *generate_dungeon(){
 	//unsigned int seed;
 	//printf("in generate_dungeon, seed = %d\n",seed);
-	printf("generating dungeon\n");
+	//printf("generating dungeon\n");
 	Dungeon *d = create_room();
-	printf("first dungeon created\n");
+	//printf("first dungeon created\n");
 	d->back = NULL;
 	d->left = generate_room(create_room(), d);
-	printf("left wing created\n");
+	//printf("left wing created\n");
 	d->right = generate_room(create_room(), d);
-	printf("right wing created\n");
+	//printf("right wing created\n");
 	d->foward = generate_room(create_room(), d);
-	printf("foward wing created\n");
+	//printf("foward wing created\n");
 	return d;
 }
 
@@ -663,7 +667,7 @@ Character *generate_player(){
 			break;
 		}
 		i++;
-        }
+	}
 
         strcpy(p->name, name);
 
