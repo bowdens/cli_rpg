@@ -119,7 +119,7 @@ int count_monsters(Monsters *m){
 void print_monsters(Monsters *m){
 	while(m){
 		if(m->monster){
-			printf("%s\t(level %d)\n\t%.1lf/%.1lf\n",m->monster->name, m->monster->level,m->monster->life, m->monster->lifeTotal);
+			printf(C_R"%s"C_W"\t(level %d)\n\t%.1lf/%.1lf\n",m->monster->name, m->monster->level,m->monster->life, m->monster->lifeTotal);
 		}
 		m = m->next;
 		}	
@@ -181,9 +181,9 @@ void print_room(Dungeon *d){
 	}
 	
 	if(d->monsters == NULL){
-		printf("\nThere are no "C_R"monsters"C_W"\n");
+		printf("\n\nThere are no "C_R"monsters"C_W"\n");
 	}else{
-		printf("\nThere are %d "C_R"monsters"C_W" in this room, they are:\n", count_monsters(d->monsters));
+		printf("\n\nThere are %d "C_R"monsters"C_W" in this room, they are:\n", count_monsters(d->monsters));
 		print_monsters(d->monsters);
 	}
 	if(d->monsters && d->monsters->monster && d->monsters->monster->dialogue){
