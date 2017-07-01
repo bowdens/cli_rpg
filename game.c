@@ -18,6 +18,7 @@ void init_c(Commands *c){
 	c = append_command_list(c, ID_B, "b", "", "selects the response B for dialogue");
 	c = append_command_list(c, ID_C, "c", "", "selects the response C for dialogue");
 	c = append_command_list(c, ID_D, "d", "", "selects the response D for dialogue");
+	c = append_command_list(c, ID_CLEAR, "clear", "", "clears the console");
 }
 
 Dungeon *move(Dungeon *d, int moveId){
@@ -160,9 +161,9 @@ int main(int argc, char **argv){
                                         printf("there is no option D\n");
                                 }
                                 break;
-
-
-
+			case ID_CLEAR :
+				system("clear");
+				break;
 		}	
 	}
 }

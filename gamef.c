@@ -206,6 +206,13 @@ Inv *generate_inventory(){
 	i->quantity = 1;
 	i->type = ITEM_SWORD;
 	i->effect = 1.2;
+	
+	i->next = create_inv();
+	strcpy(i->next->name, "Potion of healing");
+	strcpy(i->next->desc, "It will heal you if consumed");
+	i->next->quantity = 2;
+	i->next->type = ITEM_POTION;
+	i->next->effect = 20;
 	return i;
 }
 

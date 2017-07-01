@@ -20,6 +20,7 @@
 #define ID_B 8
 #define ID_C 9
 #define ID_D 10
+#define ID_CLEAR 11
 
 //Item IDs
 #define ITEM_SWORD 1
