@@ -72,16 +72,16 @@ int main(int argc, char **argv){
 	printf("allocated argument memory\n");
 
 	unsigned int seed = time(NULL);
-        if(argc >= 2){
-                //printf("argv[1] = %s\n",argv[1]);
-                //printf("atoi(argv[1] = %d\n",atoi(argv[1]));
-                if(atoi(argv[1]) > 0){
-                        seed = (unsigned int) atoi(argv[1]);
-                        //printf("seed = %d\n",seed);
-                        srand(seed);
-        	}
-        }
-	
+    if(argc >= 2){
+        //printf("argv[1] = %s\n",argv[1]);
+        //printf("atoi(argv[1] = %d\n",atoi(argv[1]));
+        if(atoi(argv[1]) > 0){
+            seed = (unsigned int) atoi(argv[1]);
+            //printf("seed = %d\n",seed);
+            srand(seed);
+    	}
+    }
+
 	printf("seed = %d\n",seed);
 	srand(seed);
 	printf("srand(%d)\n",seed);
@@ -124,7 +124,7 @@ int main(int argc, char **argv){
 				}else{
 					printf("Please specify an argument eg 'print world'\n");
 				}
-				break;					
+				break;
 			case ID_A :
 				if(d && d->monsters && d->monsters->monster && d->monsters->monster->dialogue &&  d->monsters->monster->dialogue->optionAText[0] != '\0'){
 					printf("%s\n",d->monsters->monster->dialogue->optionAText);
@@ -164,6 +164,6 @@ int main(int argc, char **argv){
 			case ID_CLEAR :
 				system("clear");
 				break;
-		}	
+		}
 	}
 }

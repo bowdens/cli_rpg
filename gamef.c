@@ -25,6 +25,16 @@ int count_rooms(Dungeon *d, int c){
 	return c;
 }
 
+int room_depth(Dungeon *d){
+    if(d == NULL) return 0;
+    int count = 1;
+    while(d->back != NULL){
+        d = d->back;
+        count ++;
+    }
+    return count;
+}
+
 void pr_i(int in){
 	for(int i = 0; i < in; i ++){
 		if(i%2 == 0){
@@ -83,25 +93,25 @@ void print_inv(Inv *i){
 void print_world(Dungeon *d, int in){
 	if(d == NULL) return;
 	//if(in == 0) printf("number of rooms = %d\n",count_rooms(d, 0));
-	
+
 	//pr_i(4*in);
 	printf(C_G "%s "C_W"\n",d->name);
-	
+
 	if(d->left){
 		pr_i(2*(in+1));
-		printf("L:");
+		printf("%d:",room_depth(d));
 		print_world(d->left, in + 1);
 	}
 
 	if(d->right){
 		pr_i(2*(in+1));
-		printf("R:");
+		printf("%d:",room_depth(d));
 		print_world(d->right, in + 1);
 	}
 
 	if(d->foward){
 		pr_i(2*(in+1));
-		printf("F:");
+		printf("%d:",room_depth(d));
 		print_world(d->foward, in + 1);
 	}
 	if(in == 0) printf("number of rooms = %d\n", count_rooms(d,0));
@@ -122,13 +132,13 @@ void print_monsters(Monsters *m){
 			printf(C_R"%s"C_W"\t(level %d)\n\t%.1lf/%.1lf\n",m->monster->name, m->monster->level,m->monster->life, m->monster->lifeTotal);
 		}
 		m = m->next;
-		}	
+		}
 }
 
 void print_dialogue(Dialogue *d){
 	//printf("printing dialogue\n");
 	if(d == NULL) return;
-	
+
 	printf("$ %s\n",d->text);
 	if(d->optionAText[0] != '\0'){
 		printf("\tA: %s\n",d->optionAText);
@@ -151,15 +161,15 @@ void print_room(Dungeon *d){
 	}else{
 		printf("a ");
 	}
-	printf(C_G"%s"C_W"\n",d->name);
-	
+	printf(C_G"%s"C_W"\tDepth = %d\n",d->name, room_depth(d));
+
 	/*printf("Its attributes include:\n");
 	printf("damage:\t%.2lf\n",d->damage);
 	printf("dinge:\t%.2lf\n",d->dinge);
 	printf("haunt:\t%.2lf\n",d->haunt);
 	printf("faith:\t%.2lf\n",d->faith);
 	*/
-	
+
 	//print_dialogue(d->monsters->monster->dialogue);
 
 	if(d->back == NULL){
@@ -167,11 +177,11 @@ void print_room(Dungeon *d){
 	}else{
 		printf("Behind you is a door from where you just came. ");
 		printf("\n" C_C"Back" C_W":\t" C_G "%s" C_W,d->back->name);
-	}	
+	}
 	if(d->foward){
 		printf("\n"C_M"Foward"C_W ":\t"C_G"%s" C_W, d->foward->name);
 	}
-	
+
 	if(d->left){
 		printf("\n"C_Y"Left"C_W ":\t" C_G "%s" C_W, d->left->name);
 	}
@@ -179,7 +189,7 @@ void print_room(Dungeon *d){
 	if(d->right){
 		printf("\n"C_B"Right" C_W ":\t" C_G "%s" C_W, d->right->name);
 	}
-	
+
 	if(d->monsters == NULL){
 		printf("\n\nThere are no "C_R"monsters"C_W"\n");
 	}else{
@@ -206,7 +216,7 @@ Inv *generate_inventory(){
 	i->quantity = 1;
 	i->type = ITEM_SWORD;
 	i->effect = 1.2;
-	
+
 	i->next = create_inv();
 	strcpy(i->next->name, "Potion of healing");
 	strcpy(i->next->desc, "It will heal you if consumed");
@@ -276,11 +286,11 @@ Dialogue *create_dialogue(){
 
 Dialogue *generate_dialogue(char *name){
 	Dialogue *d = create_dialogue();
-	
+
 	strcpy(d->text, "I am ");
 	strcat(d->text, name);
 	strcat(d->text, ", fear me!");
-	
+
 	strcpy(d->optionAText, "Please. Let me live!");
 
 	strcpy(d->optionBText, "No, ");
@@ -291,16 +301,16 @@ Dialogue *generate_dialogue(char *name){
 
 
 	strcpy(d->optionDText, "I will fight you to the death!");
-	
+
 	d->optionD = create_dialogue();
 	strcpy(d->optionD->text, "So be it!");
 
 	d->optionA = create_dialogue();
 	strcpy(d->optionA->text, "Hahaha, not likely, fool!");
-	
+
 	d->optionB = create_dialogue();
 	strcpy(d->optionB->text, "Arrogant creature, prepare yourself for battle!");
-	
+
 	d->optionC = create_dialogue();
 	strcpy(d->optionC->text, "And I am unimpressed by you. Now face me in combat!");
 	return d;
@@ -320,28 +330,30 @@ Dialogue *generate_dialogue(char *name){
 	}
 
 	strcpy(p->name, name);
-	
+
 	return p;
 }*/
 
-Character *generate_monster(){
+Character *generate_monster(int depth){
 	Character *m = malloc(sizeof(Character));
 	assert(m);
+    depth = depth/2;
+    if(depth < 1) depth = 1;
 
-	//name
+    //name
 	generate_monster_name(rand()%5 + 3, m->name);
 	//printf("Monster name generated: %s\n",m->name);
-	int r1 = rand()%8 + 1;
-	int r2 = rand()%8 + 1;
+	int r1 = rand()%depth + 1;
+	int r2 = rand()%depth + 1;
 	int r3 = 0;//rand()%7;
 	m->level = r1 * r2 + r3; //generates a random number between 0 and 70, with a bias to lower numbers
 	//printf("Monster %s's level = %d\n",m->name, m->level);
 	m->lifeTotal = m->level * 10 + rand()%10;
 	m->life = m->lifeTotal;
 	m->inventory = NULL;
-	
+
 	m->dialogue = generate_dialogue(m->name);
-	
+
 	return m;
 }
 
@@ -352,7 +364,7 @@ int highest_dungeon_attrib(Dungeon *d, double minAttrib){
 		return ATTRIB_DINGE;
 	}else if(d->haunt > d->damage && d->haunt > d->dinge && d->haunt > d->faith && d->haunt > minAttrib){
 		return ATTRIB_HAUNT;
-	}else if(d->faith > d->damage && d->faith > d->dinge && d->faith > d->haunt && d->faith > minAttrib){ 
+	}else if(d->faith > d->damage && d->faith > d->dinge && d->faith > d->haunt && d->faith > minAttrib){
 		return ATTRIB_FAITH;
 	}else{
 		return ATTRIB_NONE;
@@ -442,7 +454,7 @@ void free_clist(Clist *l){
 }
 
 int monster_over_level(Monsters *m, int level, char mName[MAX_CHARACTER_NAME-10]){
-	//replaces the name with the monster with a max level over a specified 
+	//replaces the name with the monster with a max level over a specified
 	//use MAX_CHARACTER_NAME-10 since ", lair of " is 10 chars long
 	//printf("monster_over_level called\n");
 	if(m == NULL) return 0;
@@ -457,7 +469,7 @@ int monster_over_level(Monsters *m, int level, char mName[MAX_CHARACTER_NAME-10]
 	int maxLevel = level - 1;
 	int replaced = 0;
 	//printf("\tvariavles init\n");
-	
+
 	while(m && m->monster){
 		//printf("\tlooping through monster\n");
 		if(m && m->monster && m->monster->level > maxLevel){
@@ -516,14 +528,14 @@ void generate_room_name(Dungeon *d, char name[MAX_ROOM_NAME]){
 	//printf("\tpNames = ");
 	//print_clist(pNames);
 	//printf("\t\tlength of clist = %d\n",clistl);
-        
+
 	r = rand()%clistl;
         for(int i = 0; i < r && pNames; i ++) pNames = pNames->next;
         //printf("looped to random pNames\n");
 	strcpy(prefix, pNames->text);
 	strcat(prefix, " ");
 	//printf("prefix: %s\n",prefix);
-	
+
 	//room name
 	rNames = read_subn("room_names.subn");
 	clistl = clist_length(rNames);
@@ -552,26 +564,26 @@ void generate_room_name(Dungeon *d, char name[MAX_ROOM_NAME]){
 	free_clist(rNames);
 }
 
-Monsters *generate_monster_list(){
+Monsters *generate_monster_list(int depth){
 	Monsters *ml = malloc(sizeof(Monsters));
-	ml->monster = generate_monster();
+	ml->monster = generate_monster(depth);
 	ml->next = NULL;
 	return ml;
 }
 
-Monsters *generate_many_monsters(int num){
+Monsters *generate_many_monsters(int num, int depth){
 	if(num < 1) return NULL;
-	Monsters *ml = generate_monster_list();
+	Monsters *ml = generate_monster_list(depth);
 	Monsters *head = ml;
 	for(int i = 1; i < num; i ++){
-		ml->next = generate_monster_list();
+		ml->next = generate_monster_list(depth);
 		ml = ml->next;
 	}
 	ml->next = NULL;
 	return head;
 }
 
-Dungeon *create_room(){
+Dungeon *create_room(int depth){
 	//printf("\tcreating a room\n");
 	Dungeon *d = malloc(sizeof(Dungeon));
 	assert(d);
@@ -587,7 +599,7 @@ Dungeon *create_room(){
 	//generate_inventory();
 	d->inventory = generate_inventory();
 	//printf("\t\tgenerated inv\n");
-	d->monsters = generate_many_monsters(rand()%4);
+	d->monsters = generate_many_monsters(rand()%4, depth);
 	//printf("\t\tgenerated monster\n");
 
 	//room name must be last because it is dependant on the above features
@@ -600,33 +612,33 @@ Dungeon *generate_room(Dungeon *d, Dungeon *back){
 	//printf("generating room\n");
 	if(d == NULL) return NULL;
 	d->back = back;
-	
+    int depth = room_depth(d);
 	//create a left door
 	int r = rand()%ROOM_CO;
 	//printf("\tr = %d\n",r);
 	if(r == 0){
 		//printf("creating door to the left\n");
-		d->left = generate_room(create_room(), d);
+		d->left = generate_room(create_room(depth), d);
 	}else{
 		d->left = NULL;
 	}
-	
+
 	//create a right door
 	r = rand()%ROOM_CO;
         //printf("\tr = %d\n",r);
         if(r == 0){
 		//printf("creating door to the right\n");
-		d->right = generate_room(create_room(), d);
+		d->right = generate_room(create_room(depth), d);
 	}else{
 		d->right = NULL;
 	}
-	
+
 	//create a foward door
 	r = rand()%ROOM_CO;
         //printf("\tr = %d\n",r);
         if(r == 0){
 		//printf("creating door to the front\n");
-		d->foward = generate_room(create_room(), d);
+		d->foward = generate_room(create_room(depth), d);
 	}else{
 		d->foward = NULL;
 	}
@@ -638,14 +650,14 @@ Dungeon *generate_dungeon(){
 	//unsigned int seed;
 	//printf("in generate_dungeon, seed = %d\n",seed);
 	//printf("generating dungeon\n");
-	Dungeon *d = create_room();
+	Dungeon *d = create_room(1);
 	//printf("first dungeon created\n");
 	d->back = NULL;
-	d->left = generate_room(create_room(), d);
+	d->left = generate_room(create_room(2), d);
 	//printf("left wing created\n");
-	d->right = generate_room(create_room(), d);
+	d->right = generate_room(create_room(2), d);
 	//printf("right wing created\n");
-	d->foward = generate_room(create_room(), d);
+	d->foward = generate_room(create_room(2), d);
 	//printf("foward wing created\n");
 	return d;
 }
@@ -662,21 +674,28 @@ Character *generate_player(){
 	p->strength = rand()%10;
 	p->charisma = rand()%10;
 	p->luck = rand()%10;
-	
-        char name[MAX_CHARACTER_NAME] = {0};
-        printf("Enter you character's name: ");
-        fgets(name, MAX_CHARACTER_NAME, stdin);
 
+    char name[MAX_CHARACTER_NAME] = {0};
+    printf("Enter your character's name: ");
+    int validName = 0;
+    while(validName == 0){
+        fgets(name, MAX_CHARACTER_NAME, stdin);
         int i = 0;
         while(i < MAX_CHARACTER_NAME && name[i] != '\0'){
-                if(name[i] == '\n'){
-			name[i] = '\0';
-			break;
-		}
-		i++;
-	}
+            if(name[i] == '\n'){
+        	    name[i] = '\0';
+			    break;
+		    }
+		    i++;
+	    }
+        if(strcmp(name, "room") && strcmp(name, "inv") && strcmp(name, "world")){
+            validName = 1;
+        }else{
+            printf("The name %s is reserved. Choose another\n",name);
+        }
+    }
 
-        strcpy(p->name, name);
+    strcpy(p->name, name);
 
 	return p;
 }

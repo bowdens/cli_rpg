@@ -38,18 +38,18 @@
 
 //colour definitions
 #define C_R "\x1b[31m"
-#define C_G   "\x1b[32m"
-#define C_Y  "\x1b[33m"
-#define C_B    "\x1b[34m"
+#define C_G "\x1b[32m"
+#define C_Y "\x1b[33m"
+#define C_B "\x1b[34m"
 #define C_M "\x1b[35m"
 #define C_C "\x1b[36m"
-#define C_W   "\x1b[0m" 
+#define C_W "\x1b[0m"
 
 //STRUCTS
 
 //inventory
 typedef struct inv{
-        char name[MAX_INV_NAME];
+    char name[MAX_INV_NAME];
 	char desc[MAX_INV_DESC];
 	int quantity;
 	int type;
@@ -59,12 +59,12 @@ typedef struct inv{
 
 typedef struct dialogue{
 	char text[MAX_DIALOGUE];
-	
+
 	char optionAText[MAX_DIALOGUE_TEXT];
 	char optionBText[MAX_DIALOGUE_TEXT];
 	char optionCText[MAX_DIALOGUE_TEXT];
 	char optionDText[MAX_DIALOGUE_TEXT];
-	
+
 	struct dialogue *optionA;
 	struct dialogue *optionB;
 	struct dialogue *optionC;
@@ -73,18 +73,18 @@ typedef struct dialogue{
 
 //characters (including the player and monsters
 typedef struct character{
-        char name[MAX_INV_NAME];
-        int level;
-	
+    char name[MAX_INV_NAME];
+    int level;
+
 	double lifeTotal;
 	double life;
-	
+
 	double intelligence;
 	double strength;
 	double speed;
 	double charisma;
 	double luck;
-	
+
 	Inv *inventory;
 	Dialogue *dialogue;
 } Character;
@@ -98,7 +98,7 @@ typedef struct monsters{
 //the list of dungeon rooms
 typedef struct dungeon{
 	char name[MAX_ROOM_NAME];
-	
+
 	double damage;
 	double dinge;
 	double haunt;
@@ -106,7 +106,7 @@ typedef struct dungeon{
 
 	Monsters *monsters;
 	Inv *inventory;
-	
+
 	struct dungeon *left;
 	struct dungeon *right;
 	struct dungeon *foward;
