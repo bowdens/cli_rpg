@@ -1,0 +1,33 @@
+#filereader will skip lines that begin with #. It will write the id of the
+#dialogue as the first number entered, the text surrounded by '~'s.
+#numbers at the end of dialogue seperated by text indicate the posible
+#responses for a monster dialogue
+100000-M~I am $mname$, fear me!~110000,12000,130000,140000
+    110000-P~Please, let me live!~111000,112000
+        111000-M~Haha, not likely fool! Now face me in combat!~F
+        112000-M~So be it, I shall let you live another day.~
+    120000-P~No, $mname$, fear me!~121000
+        121000-M~I have no fear of you!~F
+        122000-M~Foolish human! I will tear you limb from limb!~F
+        123000-M~You are indeed a great hero that I cannot face. Take my treasure and leave!~L
+    130000-P~I am unimpressed.~131000
+        131000-M~This matters not to me. Now face me in combat!~F
+    140000-P~You will rue the day you faced me!~141000
+        141000-M~This matters not to me. Now face me in combat!~F
+200000-M~The creature before you lets out a great roar.~210000,220000,230000
+    210000-P~I shall destroy you beast!~F
+    220000-P~I cannot harm an innocent beast~221000,222000
+        221000-M~The creature glares at you and suddenly moves to strike~F
+        222000-M~The creature ignores you and you move on~
+    230000-P~This monster must be put down.~F
+300000-M~Greetings, human. You have entered my lair. What is it you seek?~310000,320000,330000,340000
+    310000-P~It is gold and treasure that I seek~311000
+        311000-M~Ah, gold. A treasure I know much of. Answer this question and you will be rewarded.~311100,311200
+            311100-M~It takes me 4 seconds to take a step, and 2 meters away is the door. The first step I take is a meter in length, and each step thereafter is half of the previous length. How long will it take for me to reach the door?~311110,311120,311130,311140
+                311110-P~8 seconds.~311111
+                    3111111-M~Hah, this answer is wrong. I will devour you now!~F
+                311120-P~4 seconds.~311111
+                311130-P~Never.~311131
+                    311131-P~You are correct. Here is your treasure, as promised.~L
+                311140-P~32 seconds.~311111
+            311200-M

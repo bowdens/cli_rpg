@@ -15,6 +15,9 @@ typedef struct nameholder{
 	char name[MAX_ROOM_NAME];
 } Nameholder;
 
+//prototype for highest_room_attrib()
+int highest_dungeon_attrib(Dungeon *d, double minAttrib);
+
 int count_rooms(Dungeon *d, int c){
 	//printf("count rooms called\n");
 	if(d == NULL) return 0;
@@ -94,8 +97,23 @@ void print_world(Dungeon *d, int in){
 	if(d == NULL) return;
 	//if(in == 0) printf("number of rooms = %d\n",count_rooms(d, 0));
 
+    char c = 'n';
+    switch(highest_dungeon_attrib(d,60)){
+        case ATTRIB_FAITH:
+            c = 'f';
+            break;
+        case ATTRIB_DINGE:
+            c = 'd';
+            break;
+        case ATTRIB_HAUNT:
+            c = 'h';
+            break;
+        case ATTRIB_DAMAGE:
+            c = 'D';
+            break;
+    }
 	//pr_i(4*in);
-	printf(C_G "%s "C_W"\n",d->name);
+	printf(C_G "%s"C_W" (%c)\n",d->name, c);
 
 	if(d->left){
 		pr_i(2*(in+1));
