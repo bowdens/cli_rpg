@@ -36,6 +36,14 @@
 #define ATTRIB_HAUNT 3
 #define ATTRIB_FAITH 4
 
+//Dialogue
+#define DLOG_MONSTER 0
+#define DLOG_PLAYER 1
+
+#define DLOG_TALK 0
+#define DLOG_FIGHT 1
+#define DLOG_LOOT 2
+
 //colour definitions
 #define C_R "\x1b[31m"
 #define C_G "\x1b[32m"
@@ -57,6 +65,21 @@ typedef struct inv{
 	struct inv *next;
 } Inv;
 
+typedef struct dlist{
+    struct dlog *this;
+    struct dlist *next;
+} Dlist;
+
+typedef struct dlog{
+    char text[MAX_DIALOGE];
+    int speaker;
+    int action;
+    int id;
+    Dlist *responses;
+} Dlog;
+
+
+//legacy dialogue
 typedef struct dialogue{
 	char text[MAX_DIALOGUE];
 

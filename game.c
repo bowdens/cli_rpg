@@ -62,14 +62,14 @@ Dungeon *move(Dungeon *d, int moveId){
 int main(int argc, char **argv){
 	printf("starting game\n");
 	Commands *c = init_command_list();
-	printf("initialised standard commands\n");
+	printf(" - initialised standard commands\n");
 	init_c(c);
-	printf("initialised custom commands\n");
+	printf(" - initialised custom commands\n");
 
 	Arg *a = malloc(sizeof(Arg));
 	assert(a);
 	a->id = 0;
-	printf("allocated argument memory\n");
+	printf(" - allocated argument memory\n");
 
 	unsigned int seed = time(NULL);
     if(argc >= 2){
@@ -82,17 +82,17 @@ int main(int argc, char **argv){
     	}
     }
 
-	printf("seed = %d\n",seed);
+	printf(" - seed = %d\n",seed);
 	srand(seed);
-	printf("srand(%d)\n",seed);
+	//printf("srand(%d)\n",seed);
 
 	Dungeon *d = generate_dungeon();
-	printf("generated dungeon\n");
+	printf(" - generated dungeon\n");
 	Dungeon *start = d;
-	printf("designated starting room\n");
+	printf(" - designated starting room\n");
 	Character *p = generate_player();
-	printf("Character generated\n");
-	printf("This world has %d rooms\n", count_rooms(start, 0));
+	printf(" - Character generated\n");
+	printf(" - This world has %d rooms\n", count_rooms(start, 0));
 	while(1){
 		printf("\n\n");
 		if(a->id == 0 || a->id == ID_LEFT || a->id == ID_RIGHT || a->id == ID_FOWARD || a->id == ID_BACK){
