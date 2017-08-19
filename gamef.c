@@ -150,14 +150,14 @@ void print_monsters(Monsters *m){
 			printf(C_R"%s"C_W"\t(level %d)\n\t%.1lf/%.1lf\n",m->monster->name, m->monster->level,m->monster->life, m->monster->lifeTotal);
 		}
 		m = m->next;
-		}
+	}
 }
 
-void print_dialogue(Dialogue *d){
+void print_dialogue(Dialogue *d, char *speakerName){
 	//printf("printing dialogue\n");
 	if(d == NULL) return;
 
-	printf("$ %s\n",d->text);
+	printf(C_R"%s"C_W": \"%s\"\n",speakerName, d->text);
 	if(d->optionAText[0] != '\0'){
 		printf("\tA: %s\n",d->optionAText);
 	}
@@ -215,7 +215,7 @@ void print_room(Dungeon *d){
 		print_monsters(d->monsters);
 	}
 	if(d->monsters && d->monsters->monster && d->monsters->monster->dialogue){
-		print_dialogue(d->monsters->monster->dialogue);
+		print_dialogue(d->monsters->monster->dialogue, d->monsters->monster->name);
 	}
 }
 
@@ -243,6 +243,10 @@ Inv *generate_inventory(){
 	i->next->effect = 20;
 	return i;
 }
+
+/*Inv *use_item(void *itemFunction(Character *p, Monsters *m, Dungeon *d), Inv *i){
+    //TODO create function to perform an action based on an item, decrease the item in inventory
+}*/
 
 char ret_c(){
 	char a = rand()%25 + 'A';
@@ -622,7 +626,7 @@ Dungeon *create_room(int depth){
 
 	//room name must be last because it is dependant on the above features
 	generate_room_name(d, d->name);
-	//printf("generated room name = %s\n",d->name);
+	if(verbose) printf("\troom \"%s\" created\n",d->name);
 	return d;
 }
 

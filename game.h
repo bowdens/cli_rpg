@@ -9,18 +9,7 @@
 #define MAX_ROOM_SUBNAME 64
 #define MAX_ROOM_SUBNAME 64
 
-//Command IDs
-#define ID_LEFT 1
-#define ID_RIGHT 2
-#define ID_BACK 3
-#define ID_FOWARD 4
-#define ID_PRINT 5
-#define ID_TEST 6
-#define ID_A 7
-#define ID_B 8
-#define ID_C 9
-#define ID_D 10
-#define ID_CLEAR 11
+//Command IDs handled int the game.c file
 
 //Item IDs
 #define ITEM_SWORD 1
@@ -53,6 +42,10 @@
 #define C_C "\x1b[36m"
 #define C_W "\x1b[0m"
 
+//GLOBAL VARIABLES
+
+int verbose;
+
 //STRUCTS
 
 //inventory
@@ -65,13 +58,16 @@ typedef struct inv{
 	struct inv *next;
 } Inv;
 
+
+//the dlist is the overarching dialogue structure. contains the dlog and the next dlist (each stage of interaction is considered a dlist,
+//with dialogue stored in the dlog
 typedef struct dlist{
     struct dlog *this;
     struct dlist *next;
 } Dlist;
 
 typedef struct dlog{
-    char text[MAX_DIALOGE];
+    char text[MAX_DIALOGUE];
     int speaker;
     int action;
     int id;
@@ -153,10 +149,13 @@ void print_room(Dungeon *d);
 
 void print_monsters(Monsters *m);
 
-void print_dialogue(Dialogue *d);
+void print_dialogue(Dialogue *d, char *speakerName);
 
 void print_inv(Inv *i);
 
 void print_character(Character *p);
 
 int count_rooms(Dungeon *d, int c);
+
+//DIALOGUE
+void read_dlog(char *filename);
