@@ -141,7 +141,7 @@ typedef struct char_list{
 //FUNCTIONS
 Dungeon *generate_dungeon();
 
-Character *generate_player();
+Character *generate_player(char *parName);
 
 void print_world(Dungeon *d, int in);
 

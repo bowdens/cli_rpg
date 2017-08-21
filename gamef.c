@@ -179,7 +179,7 @@ void print_room(Dungeon *d){
 	}else{
 		printf("a ");
 	}
-	printf(C_G"%s"C_W"\tDepth = %d\n",d->name, room_depth(d));
+	printf(C_G"%s"C_W".\t\tDepth = %d\n",d->name, room_depth(d));
 
 	/*printf("Its attributes include:\n");
 	printf("damage:\t%.2lf\n",d->damage);
@@ -684,40 +684,86 @@ Dungeon *generate_dungeon(){
 	return d;
 }
 
+int is_valid_name(char *name){
+    if(name == NULL) return 0;
+    if(strcmp(name, "") == 0 || strcmp(name, "room")==0 || strcmp(name, "inv") == 0 || strcmp(name, "world") == 0) return 0;
+    for(unsigned int i = 0; i < strlen(name); i ++){
+        if(isspace(name[i])) return 0;
+    }
+    if(strcmp(name, "NAMEHELP") == 0){
+        printf("\nYour name must:\n - Not be 'room', 'inv', 'world', or 'NAMEHELP',\n - Not be empty (ie no letters),\n - Not have any whitespace.\n");
+        return 0;
+    }
+    return 1;
+}
+
+int get_player_stat(char *stat, int *totalPoints, int *remainingPoints){
+    if(*remainingPoints == 0){
+        printf("\nYou have 0 points left to spend. Setting %s to 0.\n",stat);
+        return 0;
+    }
+
+    printf("\nYou have %d/%d points to spend.\nEnter your %s: ",*remainingPoints, *totalPoints, stat);
+
+    int point = *totalPoints;
+    char inputPoint[100] = {0};
+    fgets(inputPoint, 100, stdin);
+    point = atoi(inputPoint);
+    while(point > *remainingPoints || point < 0){
+        printf("Error: You entered %d this is an invalid value %s.\nEnter your %s: ", *remainingPoints, point < 0 ? "since it is less than 0":"since you don't have enough points left", stat);
+        fgets(inputPoint, 100, stdin);
+        point = atoi(inputPoint);
+    }
+    *remainingPoints -= point;
+    return point;
+}
+
+void generate_player_stats(Character *p, int totalPoints){
+    printf("generating player statistics with %d total points\n",totalPoints);
+    int remainingPoints = totalPoints;
+    p->intelligence = get_player_stat("intelligence", &totalPoints, &remainingPoints);
+    p->strength = get_player_stat("strength", &totalPoints, &remainingPoints);
+    p->speed = get_player_stat("speed", &totalPoints, &remainingPoints);
+    p->charisma = get_player_stat("charisma", &totalPoints, &remainingPoints);
+    p->luck = get_player_stat("luck", &totalPoints, &remainingPoints);
+}
+
 //initiialise the player
-Character *generate_player(){
+Character *generate_player(char *parName){
 	Character *p = malloc(sizeof(Character));
 	assert(p);
 
-	p->inventory = generate_inventory();
-	p->lifeTotal = 100;
-	p->life = rand()%((int)p->lifeTotal/10) + p->lifeTotal * 0.9;
-	p->intelligence = rand()%10;
-	p->strength = rand()%10;
-	p->charisma = rand()%10;
-	p->luck = rand()%10;
-
     char name[MAX_CHARACTER_NAME] = {0};
-    printf("Enter your character's name: ");
-    int validName = 0;
-    while(validName == 0){
-        fgets(name, MAX_CHARACTER_NAME, stdin);
-        int i = 0;
-        while(i < MAX_CHARACTER_NAME && name[i] != '\0'){
-            if(name[i] == '\n'){
-        	    name[i] = '\0';
-			    break;
-		    }
-		    i++;
-	    }
-        if(strcmp(name, "room") && strcmp(name, "inv") && strcmp(name, "world")){
-            validName = 1;
-        }else{
-            printf("The name %s is reserved. Choose another\n",name);
+    if(parName == NULL || (strcmp(parName, "") == 0 || is_valid_name(parName) == 0)){
+        if(parName != NULL && !is_valid_name(parName)) printf("Warning: \"%s\" is an invalid name. ", parName);
+        printf("Enter your character's name: ");
+        int validName = 0;
+        while(validName == 0){
+            fgets(name, MAX_CHARACTER_NAME, stdin);
+            int i = 0;
+            while(i < MAX_CHARACTER_NAME && name[i] != '\0'){
+                if(name[i] == '\n'){
+            	    name[i] = '\0';
+	    		    break;
+	    	    }
+	    	    i++;
+	        }
+            if(is_valid_name(name)){
+                validName = 1;
+            }else{
+                if(strcmp(name, "NAMEHELP")) printf("%sThe name \"%s\" is not allowed. Enter 'NAMEHELP' for information about which names are valid\n",name[0] == '\0' ? "\n":"", name);
+                printf("Enter your character's name: ");
+            }
         }
+    }else{
+        strncpy(name, parName, MAX_CHARACTER_NAME);
     }
-
     strcpy(p->name, name);
+
+    p->inventory = generate_inventory();
+    p->lifeTotal = 100;
+    p->life = p->lifeTotal;
+    generate_player_stats(p,25);
 
 	return p;
 }

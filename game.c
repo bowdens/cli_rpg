@@ -84,7 +84,7 @@ int any_equals(int c, char *source[c], char *comparison){
 }
 
 int prefix_equals(char *a, char *b){
-    printf("checking if the prefix of '%s' = '%s\n",a,b);
+    //printf("checking if the prefix of '%s' = '%s\n",a,b);
     if(strlen(a) < strlen(b)) return 0;
     for(unsigned int i= 0; i < strlen(a) && i < strlen(b); i ++){
         if(a[i]!=b[i]) return 0;
@@ -95,18 +95,28 @@ int prefix_equals(char *a, char *b){
 int return_flag_argument(int argc, char **argv, char *flagPrefix){
     for(int i = 0; i < argc; i ++){
         if(prefix_equals(argv[i], flagPrefix)){
-            printf("prefixes match\n");
+            //printf("prefixes match\n");
             return atoi(argv[i] + strlen(flagPrefix));
         }
     }
     return -1;
 }
 
+char *char_return_flag_argument(int argc, char **argv, char *flagPrefix){
+    for(int i = 0; i < argc; i ++){
+        if(prefix_equals(argv[i], flagPrefix)){
+            return argv[i] + strlen(flagPrefix);
+
+        }
+    }
+    return NULL;
+}
+
 int has_flag(int argc, char **argv, char flag){
     for(int i = 0; i < argc; i ++){
         if(argv[i][0] == '-'){
             //this one is flag
-            for(int j = 1; j < (int)strlen(argv[i]); j ++){
+            for(int j = 1; j < (int)strlen(argv[i]) && argv[i][j] != '='; j ++){
                 if(argv[i][j] == flag) return 1;
             }
         }
@@ -116,6 +126,9 @@ int has_flag(int argc, char **argv, char flag){
 
 int main(int argc, char **argv){
     verbose = has_flag(argc, argv, 'v');
+
+    set_lt_verbose(return_flag_argument(argc, argv, "-ltVerbose="));
+
     if(verbose) printf("starting game\n");
 	Commands *c = init_command_list();
 	if(verbose) printf(" - initialised standard commands\n");
@@ -132,7 +145,7 @@ int main(int argc, char **argv){
         //printf("argv[1] = %s\n",argv[1]);
         //printf("atoi(argv[1] = %d\n",atoi(argv[1]));
         int seed_num = return_flag_argument(argc, argv, "-seed=");
-        printf("seed num from flags = %d\n",seed_num);
+        if(verbose) printf("seed num from flags = %d\n",seed_num);
         if(seed_num > 0) seed = (unsigned int)seed_num;
     }
 
@@ -144,16 +157,25 @@ int main(int argc, char **argv){
 	if(verbose) printf(" - generated dungeon\n");
 	Dungeon *start = d;
 	if(verbose) printf(" - designated starting room\n");
-	Character *p = generate_player();
-	if(verbose) printf(" - Character generated\n");
+
+    char *tempName = char_return_flag_argument(argc, argv, "-name=");
+	Character *p = generate_player(tempName?tempName:NULL);
+	if(verbose) printf("Welcome %s\n",p->name);
+
+    if(verbose) printf(" - Character generated\n");
 	if(verbose) printf(" - This world has %d rooms\n", count_rooms(start, 0));
 	while(1){
-		printf("\n\n");
+		printf("\n");
 		if(a->id == 0 || a->id == ID_LEFT || a->id == ID_RIGHT || a->id == ID_FOWARD || (a->id == ID_BACK && d != start/*TODO change so it prints from depth =2*/)){
 			print_room(d);
 		}
+        //printf("getting input\n");
 		a = get_input(c,a);
-		if(a == NULL) return 1;
+		if(a == NULL){
+            printf("ERROR: exiting due to NULL arguments\n");
+            return 1;
+        }
+        //printf("input got\n");
 		int id = a->id;
 
 		//handle movement commands
