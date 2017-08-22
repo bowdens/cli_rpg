@@ -177,6 +177,12 @@ void print_dialogue(Dialogue *d, char *speakerName);
 
 void print_inv(Inv *i);
 
+Character *find_character_index(Charlist *ml, Character *p, int x);
+
+Character *find_character(Charlist *ml, Character *p, char *name);
+
+Charlist *create_charlist(void);
+
 Inv *find_item(Inv *i, char *name);
 
 Inv *find_item_index(Inv *it, int x);

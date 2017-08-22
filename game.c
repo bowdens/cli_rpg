@@ -211,23 +211,49 @@ int main(int argc, char **argv){
 				}
 				break;
             case ID_USE:
-                if(a->next == NULL){
-                    printf("Usage: %s item (number or name)\n",a->arg);
+                //USE ITEM
+                if(a->next == NULL || a->next->next == NULL){
+                    printf("Usage: %s item (number or name), target (number or name)\n",a->arg);
                     break;
                 }
                 Inv *i;
+                Character *target;
                 if(is_num(a->next->arg)){
                     //printf("entered a number\n");
+                    if(verbose) printf("finding item through index\n");
                     i = find_item_index(p->inventory, atoi(a->next->arg) -1);
                 }else{
                     //printf("entered a str\n");
+                    if(verbose) printf("finding item through name\n");
                     i = find_item(p->inventory, a->next->arg);
                 }
+                if(is_num(a->next->next->arg)){
+                    if(verbose) printf("finding character using index\n");
+                    target = find_character_index(d->monsters, p, atoi(a->next->next->arg));
+                }else{
+                    if(verbose) printf("finding character through name\n");
+                    target = find_character(d->monsters, p, a->next->next->arg);
+                }
+
+                //printf("Target = %p\n",target);
                 if(i == NULL){
                    printf("You are not carrying %s\n",is_num(a->next->arg)?"that many items":strcat(is_vowel(a->next->arg[0])?"an":"a",a->next->arg));
                    break;
                 }
-                i->usef(i, d->monsters, p);
+                if(target == NULL){
+                    printf("%s does not exist\n",is_num(a->next->next->arg)?strcat("Character ", a->next->next->arg):a->next->next->arg);
+                    break;
+                }
+                if(target != p){
+                    if(verbose) printf("target is not self\n");
+                    d->monsters->curr = target;
+                    i->usef(i, d->monsters, p);
+                }else{
+                    if(verbose) printf("target is self\n");
+                    Charlist *pl = create_charlist();
+                    pl->first = pl->last = pl->curr = p;
+                    i->usef(i, pl, p);
+                }
                 break;
 			case ID_A :
 				if(d && d->monsters && d->monsters->first && d->monsters->first->dialogue &&  d->monsters->first->dialogue->optionAText[0] != '\0'){

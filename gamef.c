@@ -20,6 +20,24 @@ typedef struct nameholder{
 //prototype for highest_room_attrib()
 int highest_dungeon_attrib(Dungeon *d, double minAttrib);
 
+void free_Character(Character *c){
+    while(c){
+        Character *temp = c;
+        free(temp);
+        c = c->next;
+    }
+}
+
+void free_Charlist(Charlist *l){
+    free(l->first);
+    free(l);
+}
+
+void safe_exit(int exit_status){
+    printf("freeing all memory locations and exiting");
+    exit(exit_status);
+}
+
 int count_rooms(Dungeon *d, int c){
 	//printf("count rooms called\n");
 	if(d == NULL) return 0;
@@ -69,11 +87,36 @@ int item_exists(Inv *i, char *name){
     return 0;
 }
 
+Character *find_character_index(Charlist *ml, Character *p, int x){
+    if(ml == NULL && p == NULL) return NULL;
+    if(x == 0) return p;
+    if(ml == NULL) return NULL;
+
+    Character *t = ml->first;
+    for(int i = -1; i < x; i ++){
+        if(t == NULL) return NULL;
+        t = t->next;
+    }
+    return t;
+}
+
+Character *find_character(Charlist *ml, Character *p, char *name){
+    if(name == NULL) return NULL;
+    if(p != NULL && strcmp(p->name, name) == 0) return p;
+    if(ml == NULL) return NULL;
+    Character *t = ml->first;
+    while(t){
+        if(strcmp(t->name,name) == 0) return t;
+        t = t->next;
+    }
+    return NULL;
+}
+
 Inv *find_item_index(Inv *i, int x){
     Inv *t = i;
     for(int a = 0; a < x; a ++){
-        t = t->next;
         if(t == NULL) return NULL;
+        t = t->next;
     }
     return t;
 }
@@ -83,7 +126,7 @@ Inv *find_item(Inv *i, char *name){
     for(Inv *t = i; t != NULL; t = t->next){
         if(strcmp(name, t->name) == 0) return t;
     }
-    return 0;
+    return NULL;
 }
 int is_num(char *str);
 void print_inv(Inv *i){
@@ -173,8 +216,9 @@ int count_monsters(Charlist *cl){
 }
 
 void print_monsters(Charlist *ml){
-	for(Character *m = ml->first; m != NULL; m = m->next){
-		printf(C_R"%s"C_W"\t(level %d)\n\t%.1lf/%.1lf\n",m->name, m->level,m->life, m->lifeTotal);
+    int i = 1;
+	for(Character *m = ml->first; m != NULL; m = m->next, i++){
+		printf("%d: "C_R"%s"C_W"\t(level %d)\n\t%.1lf/%.1lf\n",i, m->name, m->level,m->life, m->lifeTotal);
 	}
 }
 

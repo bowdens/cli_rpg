@@ -3,7 +3,12 @@
 #include <stdlib.h>
 
 void player_die(void *ptr){
-    printf("You died\n");
+    Character *p = (Character*) ptr;
+    if(p == NULL){
+        printf("Tried to kill player but player does not exist\n");
+        exit(EXIT_FAILURE);
+    }
+    printf("%s died\n", p->name);
     exit(EXIT_SUCCESS);
 }
 

@@ -19,20 +19,50 @@ void use_sword(void *inv, void *character, void *player){
         printf("You do not hit anything\n");
         return;
     }
+    if(p == NULL){
+        printf("ERROR: You cannot attack with your sword because you do not exist\n");
+        return;
+    }
     double damage = i->effect;
     int crt = rand()%(int)round((SKILL_CAP - round(p->luck))/4 + 1);
-    printf("crt = %d\n",crt);
+    //printf("crt = %d\n",crt);
     if(crt == 0){
         damage = damage * 2 + (double)p->luck/SKILL_CAP;
         printf(C_Y"Critical!"C_W"\n");
     }
     target->curr->life -= i->effect;
-    printf("%.1lf damage was dealt to "C_R"%s"C_W" using a%s "C_B"%s"C_W". "C_R"%s"C_W" now has %.1lf/%.1lf health remaining.\n",
-            damage, target->curr->name, is_vowel(i->name[0])?"n":"", i->name, target->curr->name, target->curr->life >= 0?target->curr->life:0,
+    printf("%s dealt %.1lf damage to %s using a%s "C_B"%s"C_W". "C_R"%s"C_W" now has %.1lf/%.1lf health remaining.\n",
+            p->name, damage, target->curr->name, is_vowel(i->name[0])?"n":"", i->name, target->curr->name, target->curr->life >= 0?target->curr->life:0,
             target->curr->lifeTotal);
     if(target->curr->life < 0.1) target->curr->dief(target);
 }
 
+double cap(double amount, double max){
+    return amount > max ? max : amount;
+}
+
 void use_potionh(void *inv, void *character, void *player){
-    //TODO
+    Inv *i = (Inv*) inv;
+    if(i == NULL){
+        printf("You do not have this item\n");
+        return;
+    }
+    Character *target = (Character*) character;
+    if(target == NULL){
+        printf("Your target does not exist\n");
+        return;
+    }
+    Character *p = (Character*) player;
+    if(p == NULL){
+        printf("ERROR: you do not exist\n");
+        return;
+    }
+    if(i->quantity < 1){
+        printf("You have no more "C_B"%s"C_W"\n",i->name);
+        return;
+    }
+    i->quantity -= 1;
+    double heal = cap(i->effect, target->lifeTotal - target->life);
+    printf("You healed %s for "C_Y"%.1lf"C_W" health\n",character == player ? "yourself":target->name, heal);
+    target->life += heal;
 }
