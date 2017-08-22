@@ -7,6 +7,8 @@
 #include <string.h>
 #include "tomlib.h"
 #include <ctype.h>
+#include "item.h"
+#include "die.h"
 
 // 1/ROOM_CO chance of generating a room to the left/right/foward
 #define ROOM_CO 3
@@ -59,9 +61,35 @@ void print_character(Character *p){
 	print_inv(p->inventory);
 }
 
+int item_exists(Inv *i, char *name){
+    if(name == NULL) return 0;
+    for(Inv *t = i; t != NULL; t = t->next){
+        if(strcmp(name, t->name) == 0) return 1;
+    }
+    return 0;
+}
+
+Inv *find_item_index(Inv *i, int x){
+    Inv *t = i;
+    for(int a = 0; a < x; a ++){
+        t = t->next;
+        if(t == NULL) return NULL;
+    }
+    return t;
+}
+
+Inv *find_item(Inv *i, char *name){
+    if(name == NULL) return NULL;
+    for(Inv *t = i; t != NULL; t = t->next){
+        if(strcmp(name, t->name) == 0) return t;
+    }
+    return 0;
+}
+int is_num(char *str);
 void print_inv(Inv *i){
+    int c = 1;
 	while(i){
-		printf(C_B"%s"C_W"\tTYPE: ",i->name);
+		printf("%d: "C_B"%s"C_W"\tTYPE: ",c,i->name);
 		switch(i->type){
 			case ITEM_SWORD:
 				printf(C_R"sword"C_W);
@@ -90,6 +118,7 @@ void print_inv(Inv *i){
 			printf("\tHealing ability: "C_R"%0.lf\n"C_W,i->effect);
 		}
 		i = i->next;
+        c++;
 	}
 }
 
@@ -135,21 +164,17 @@ void print_world(Dungeon *d, int in){
 	if(in == 0) printf("number of rooms = %d\n", count_rooms(d,0));
 }
 
-int count_monsters(Monsters *m){
-	int c = 0;
-	while(m){
-		c ++;
-		m = m->next;
+int count_monsters(Charlist *cl){
+	int i = 0;
+	for(Character *c = cl->first; c != NULL; c = c->next){
+		i ++;
 	}
-	return c;
+	return i;
 }
 
-void print_monsters(Monsters *m){
-	while(m){
-		if(m->monster){
-			printf(C_R"%s"C_W"\t(level %d)\n\t%.1lf/%.1lf\n",m->monster->name, m->monster->level,m->monster->life, m->monster->lifeTotal);
-		}
-		m = m->next;
+void print_monsters(Charlist *ml){
+	for(Character *m = ml->first; m != NULL; m = m->next){
+		printf(C_R"%s"C_W"\t(level %d)\n\t%.1lf/%.1lf\n",m->name, m->level,m->life, m->lifeTotal);
 	}
 }
 
@@ -214,8 +239,8 @@ void print_room(Dungeon *d){
 		printf("\n\nThere are %d "C_R"monsters"C_W" in this room, they are:\n", count_monsters(d->monsters));
 		print_monsters(d->monsters);
 	}
-	if(d->monsters && d->monsters->monster && d->monsters->monster->dialogue){
-		print_dialogue(d->monsters->monster->dialogue, d->monsters->monster->name);
+	if(d->monsters && d->monsters->first && d->monsters->first->dialogue){
+		print_dialogue(d->monsters->first->dialogue, d->monsters->first->name);
 	}
 }
 
@@ -233,7 +258,9 @@ Inv *generate_inventory(){
 	strcpy(i->desc, "Its rusty but at least its better than your bare hands.");
 	i->quantity = 1;
 	i->type = ITEM_SWORD;
-	i->effect = 1.2;
+	i->effect = 4.8;
+    i->usef = use_sword;
+
 
 	i->next = create_inv();
 	strcpy(i->next->name, "Potion of healing");
@@ -241,11 +268,12 @@ Inv *generate_inventory(){
 	i->next->quantity = 2;
 	i->next->type = ITEM_POTION;
 	i->next->effect = 20;
+    i->next->usef = use_potionh;
 	return i;
 }
 
-/*Inv *use_item(void *itemFunction(Character *p, Monsters *m, Dungeon *d), Inv *i){
-    //TODO create function to perform an action based on an item, decrease the item in inventory
+/*void use_item(Inv *i, Character *c, Character *p){
+    i->usef(i, c, p);
 }*/
 
 char ret_c(){
@@ -376,6 +404,10 @@ Character *generate_monster(int depth){
 
 	m->dialogue = generate_dialogue(m->name);
 
+    m->dief = monster_die;
+
+    m->next = NULL;
+    m->prev = NULL;
 	return m;
 }
 
@@ -475,7 +507,7 @@ void free_clist(Clist *l){
 	}
 }
 
-int monster_over_level(Monsters *m, int level, char mName[MAX_CHARACTER_NAME-10]){
+int monster_over_level(Charlist *m, int level, char mName[MAX_CHARACTER_NAME-10]){
 	//replaces the name with the monster with a max level over a specified
 	//use MAX_CHARACTER_NAME-10 since ", lair of " is 10 chars long
 	//printf("monster_over_level called\n");
@@ -483,7 +515,7 @@ int monster_over_level(Monsters *m, int level, char mName[MAX_CHARACTER_NAME-10]
 	//printf("\tm is not null\n");
 	//printf("\tm = %p",m);
 	//printf(", m->monster = %p\n",m->monster);
-	if(m->monster == NULL) return 0;
+	if(m->first == NULL) return 0;
 	//printf("\tm->monster is not null\n");
 	//printf("\tentering monster over level\n");
 
@@ -492,15 +524,14 @@ int monster_over_level(Monsters *m, int level, char mName[MAX_CHARACTER_NAME-10]
 	int replaced = 0;
 	//printf("\tvariavles init\n");
 
-	while(m && m->monster){
+	for(Character *curr = m->first; curr != NULL; curr = curr->next){
 		//printf("\tlooping through monster\n");
-		if(m && m->monster && m->monster->level > maxLevel){
+		if(curr->level > maxLevel){
 			//printf("monster %s has a higher level than the previous max %d, at %d\n",m->monster->name,maxLevel, m->monster->level);
-			strcpy(maxName, m->monster->name);
-			maxLevel = m->monster->level;
+			strcpy(maxName, curr->name);
+			maxLevel = curr->level;
 			replaced = 1;
 		}
-		m = m->next;
 	}
 	strncpy(mName,maxName, MAX_CHARACTER_NAME-10);
 	//printf("Monster over level returned, value %d\n", replaced);
@@ -586,27 +617,40 @@ void generate_room_name(Dungeon *d, char name[MAX_ROOM_NAME]){
 	free_clist(rNames);
 }
 
-Monsters *generate_monster_list(int depth){
-	Monsters *ml = malloc(sizeof(Monsters));
-	ml->monster = generate_monster(depth);
-	ml->next = NULL;
-	return ml;
+void append_monster_list(Charlist *ml, int depth){
+    Character *m = generate_monster(depth);
+    assert(m);
+    if(ml->last == NULL){
+        ml->first = m;
+        ml->last = m;
+        ml->curr = m;
+        return;
+    }
+    ml->last->next = m;
+    ml->last->next->prev = ml->last;
+    ml->last = m;
 }
 
-Monsters *generate_many_monsters(int num, int depth){
+Charlist *create_charlist(void){
+    Charlist *cl = malloc(sizeof(Charlist));
+    cl->first = NULL;
+    cl->curr = NULL;
+    cl->last = NULL;
+    return cl;
+}
+
+Charlist *generate_many_monsters(int num, int depth){
 	if(num < 1) return NULL;
-	Monsters *ml = generate_monster_list(depth);
-	Monsters *head = ml;
-	for(int i = 1; i < num; i ++){
-		ml->next = generate_monster_list(depth);
-		ml = ml->next;
+	Charlist *ml = create_charlist();
+	Charlist *head = ml;
+	for(int i = 0; i < num; i ++){
+		append_monster_list(ml, depth);
 	}
-	ml->next = NULL;
 	return head;
 }
 
 Dungeon *create_room(int depth){
-	//printf("\tcreating a room\n");
+	if(verbose) printf("\tcreating a room\n");
 	Dungeon *d = malloc(sizeof(Dungeon));
 	assert(d);
 	//printf("dungeon created at %p\n",d);
@@ -615,14 +659,14 @@ Dungeon *create_room(int depth){
 	d->dinge = (rand()%10000)/100.0;
 	d->haunt = (rand()%10000)/100.0;
 	d->faith = (rand()%10000)/100.0;
-	//printf("\t\tattributes created\n");
+	//if(verbose) printf("\t\tattributes created\n");
 
 	d->inventory = NULL;
 	//generate_inventory();
 	d->inventory = generate_inventory();
-	//printf("\t\tgenerated inv\n");
+	//if(verbose) printf("\t\tgenerated inv\n");
 	d->monsters = generate_many_monsters(rand()%4, depth);
-	//printf("\t\tgenerated monster\n");
+	//if(verbose) printf("\t\tgenerated monster\n");
 
 	//room name must be last because it is dependant on the above features
 	generate_room_name(d, d->name);
@@ -631,7 +675,7 @@ Dungeon *create_room(int depth){
 }
 
 Dungeon *generate_room(Dungeon *d, Dungeon *back){
-	//printf("generating room\n");
+	//if(verbose) printf("\tgenerating room\n");
 	if(d == NULL) return NULL;
 	d->back = back;
     int depth = room_depth(d);
@@ -685,6 +729,7 @@ Dungeon *generate_dungeon(){
 }
 
 int is_valid_name(char *name){
+    //checks whether a name is valid
     if(name == NULL) return 0;
     if(strcmp(name, "") == 0 || strcmp(name, "room")==0 || strcmp(name, "inv") == 0 || strcmp(name, "world") == 0) return 0;
     for(unsigned int i = 0; i < strlen(name); i ++){
@@ -697,8 +742,24 @@ int is_valid_name(char *name){
     return 1;
 }
 
+int is_num(char *str){
+    //checks through a string to ensure all characters are digits (allows a trailing \n character)
+    for(unsigned int i = 0; str[i] != '\0'; i ++){
+        //printf("i = %d, str[%d] = %c\n",i,i,str[i]);
+        if(str[i] == '\n' && str[i+1] == '\0') break;
+        if(isdigit(str[i]) == 0){
+            //printf("returning 0\n");
+            return 0;
+        }
+    }
+    //printf("returning 1\n");
+    return 1;
+}
+
 int get_player_stat(char *stat, int *totalPoints, int *remainingPoints){
-    if(*remainingPoints == 0){
+    //returns a value entered by the user which is lower than the remaining points. reduces the remaining points by the value entered
+    //only accepts integers >= 0
+    if(*remainingPoints <= 0){
         printf("\nYou have 0 points left to spend. Setting %s to 0.\n",stat);
         return 0;
     }
@@ -707,18 +768,22 @@ int get_player_stat(char *stat, int *totalPoints, int *remainingPoints){
 
     int point = *totalPoints;
     char inputPoint[100] = {0};
-    fgets(inputPoint, 100, stdin);
-    point = atoi(inputPoint);
-    while(point > *remainingPoints || point < 0){
-        printf("Error: You entered %d this is an invalid value %s.\nEnter your %s: ", *remainingPoints, point < 0 ? "since it is less than 0":"since you don't have enough points left", stat);
+    do{
         fgets(inputPoint, 100, stdin);
-        point = atoi(inputPoint);
-    }
+        //printf("You entered %s = %d\n",inputPoint, atoi(inputPoint));
+        if(!is_num(inputPoint) || atoi(inputPoint) < 0 || atoi(inputPoint) > *remainingPoints){
+            printf("\nError: You entered an invalid value for %s. You have %d/%d points left to spend.\nEnter your %s: ",stat, *remainingPoints, *totalPoints, stat);
+        }else{
+            point = atoi(inputPoint);
+            break;
+        }
+    } while(1);
     *remainingPoints -= point;
     return point;
 }
 
 void generate_player_stats(Character *p, int totalPoints){
+    //creates the players statistics based on what they enter
     printf("generating player statistics with %d total points\n",totalPoints);
     int remainingPoints = totalPoints;
     p->intelligence = get_player_stat("intelligence", &totalPoints, &remainingPoints);
@@ -730,7 +795,8 @@ void generate_player_stats(Character *p, int totalPoints){
 
 //initiialise the player
 Character *generate_player(char *parName){
-	Character *p = malloc(sizeof(Character));
+	//printf("Generate player called\n");
+    Character *p = malloc(sizeof(Character));
 	assert(p);
 
     char name[MAX_CHARACTER_NAME] = {0};

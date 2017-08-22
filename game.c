@@ -5,18 +5,19 @@
 #include <assert.h>
 #include <time.h>
 #include <string.h>
+#include "tomlib.h"
 
 #define ID_LEFT 1
 #define ID_RIGHT 2
 #define ID_FOWARD 3
 #define ID_BACK 4
-#define ID_USE 5
 #define ID_PRINT 6
 #define ID_A 7
 #define ID_B 8
 #define ID_C 9
 #define ID_D 10
 #define ID_CLEAR 11
+#define ID_USE 12
 
 void init_c(Commands *c){
 	c = append_command_list(c, ID_LEFT, "left", "", "try to move left", COM_SHOWN);
@@ -69,9 +70,6 @@ Dungeon *move(Dungeon *d, int moveId){
 				printf("There is no door to your back\n");
 			}
 			break;
-        case ID_USE:
-            //match to item in inventory
-            break;
 	}
 	return d;
 }
@@ -149,7 +147,7 @@ int main(int argc, char **argv){
         if(seed_num > 0) seed = (unsigned int)seed_num;
     }
 
-	if(verbose) printf(" - seed = %d\n",seed);
+	printf("%sseed = %d\n",verbose?" - ":">",seed);
 	srand(seed);
 	//printf("srand(%d)\n",seed);
 
@@ -159,8 +157,19 @@ int main(int argc, char **argv){
 	if(verbose) printf(" - designated starting room\n");
 
     char *tempName = char_return_flag_argument(argc, argv, "-name=");
-	Character *p = generate_player(tempName?tempName:NULL);
-	if(verbose) printf("Welcome %s\n",p->name);
+	if(verbose) printf(" - name from commandline read\n");
+
+    if(tempName != NULL && strcmp(tempName, "RANDOMNAME") == 0){
+        if(verbose) printf("generating random name\n");
+        generate_monster_name(rand()%5 + 5, tempName);
+        printf("Your name is '%s'\n",tempName);
+    }
+
+    if(verbose) printf(" - Generating player\n");
+    Character *p = generate_player(tempName?tempName:NULL);
+	//p->luck = SKILL_CAP;
+    print_character(p);
+    if(verbose) printf("Welcome %s\n",p->name);
 
     if(verbose) printf(" - Character generated\n");
 	if(verbose) printf(" - This world has %d rooms\n", count_rooms(start, 0));
@@ -201,42 +210,61 @@ int main(int argc, char **argv){
 					printf("Please specify an argument eg 'print world'\n");
 				}
 				break;
+            case ID_USE:
+                if(a->next == NULL){
+                    printf("Usage: %s item (number or name)\n",a->arg);
+                    break;
+                }
+                Inv *i;
+                if(is_num(a->next->arg)){
+                    //printf("entered a number\n");
+                    i = find_item_index(p->inventory, atoi(a->next->arg) -1);
+                }else{
+                    //printf("entered a str\n");
+                    i = find_item(p->inventory, a->next->arg);
+                }
+                if(i == NULL){
+                   printf("You are not carrying %s\n",is_num(a->next->arg)?"that many items":strcat(is_vowel(a->next->arg[0])?"an":"a",a->next->arg));
+                   break;
+                }
+                i->usef(i, d->monsters, p);
+                break;
 			case ID_A :
-				if(d && d->monsters && d->monsters->monster && d->monsters->monster->dialogue &&  d->monsters->monster->dialogue->optionAText[0] != '\0'){
-					printf("%s\n",d->monsters->monster->dialogue->optionAText);
-					d->monsters->monster->dialogue = d->monsters->monster->dialogue->optionA;
-					print_dialogue(d->monsters->monster->dialogue, d->monsters->monster->name);
+				if(d && d->monsters && d->monsters->first && d->monsters->first->dialogue &&  d->monsters->first->dialogue->optionAText[0] != '\0'){
+					printf("%s\n",d->monsters->first->dialogue->optionAText);
+					d->monsters->first->dialogue = d->monsters->first->dialogue->optionA;
+					print_dialogue(d->monsters->first->dialogue, d->monsters->first->name);
 				}else{
 					printf("there is no option A\n");
 				}
 				break;
             case ID_B :
-                if(d && d->monsters && d->monsters->monster && d->monsters->monster->dialogue && d->monsters->monster->dialogue->optionBText[0] != '\0'){
-                    printf("%s\n",d->monsters->monster->dialogue->optionBText);
-                    d->monsters->monster->dialogue = d->monsters->monster->dialogue->optionB;
-                    print_dialogue(d->monsters->monster->dialogue, d->monsters->monster->name);
+                if(d && d->monsters && d->monsters->first && d->monsters->first->dialogue && d->monsters->first->dialogue->optionBText[0] != '\0'){
+                    printf("%s\n",d->monsters->first->dialogue->optionBText);
+                    d->monsters->first->dialogue = d->monsters->first->dialogue->optionB;
+                    print_dialogue(d->monsters->first->dialogue, d->monsters->first->name);
                 }else{
                     printf("there is no option B\n");
                 }
                 break;
             case ID_C :
-                if(d && d->monsters && d->monsters->monster && d->monsters->monster->dialogue && d->monsters->monster->dialogue->optionCText[0] != '\0'){
-                    printf("%s\n",d->monsters->monster->dialogue->optionCText);
-                    d->monsters->monster->dialogue = d->monsters->monster->dialogue->optionC;
-                    print_dialogue(d->monsters->monster->dialogue, d->monsters->monster->name);
+                if(d && d->monsters && d->monsters->first && d->monsters->first->dialogue && d->monsters->first->dialogue->optionCText[0] != '\0'){
+                    printf("%s\n",d->monsters->first->dialogue->optionCText);
+                    d->monsters->first->dialogue = d->monsters->first->dialogue->optionC;
+                    print_dialogue(d->monsters->first->dialogue, d->monsters->first->name);
                 }else{
                     printf("there is no option C\n");
                 }
                 break;
             case ID_D :
-                if(d && d->monsters && d->monsters->monster && d->monsters->monster->dialogue && d->monsters->monster->dialogue->optionDText[0] != '\0'){
-                printf("%s\n",d->monsters->monster->dialogue->optionDText);
-                d->monsters->monster->dialogue = d->monsters->monster->dialogue->optionD;
-                print_dialogue(d->monsters->monster->dialogue, d->monsters->monster->name);
-            }else{
-                printf("there is no option D\n");
-            }
-            break;
+                if(d && d->monsters && d->monsters->first && d->monsters->first->dialogue && d->monsters->first->dialogue->optionDText[0] != '\0'){
+                    printf("%s\n",d->monsters->first->dialogue->optionDText);
+                    d->monsters->first->dialogue = d->monsters->first->dialogue->optionD;
+                    print_dialogue(d->monsters->first->dialogue, d->monsters->first->name);
+                }else{
+                    printf("there is no option D\n");
+                }
+                break;
 			case ID_CLEAR :
 				system("clear");
 				break;

@@ -1,3 +1,6 @@
+#ifndef __GAME_H
+#define __GAME_G 1
+
 //Maximum string lengths
 #define MAX_ROOM_NAME 256
 #define MAX_CHARACTER_NAME 64
@@ -33,6 +36,8 @@
 #define DLOG_FIGHT 1
 #define DLOG_LOOT 2
 
+#define SKILL_CAP 100
+
 //colour definitions
 #define C_R "\x1b[31m"
 #define C_G "\x1b[32m"
@@ -49,14 +54,22 @@ int verbose;
 //STRUCTS
 
 //inventory
-typedef struct inv{
+
+typedef struct inv Inv;
+typedef struct character Character;
+
+typedef void (*Usef)(void*, void*, void*);
+typedef void (*Dief)(void *);
+
+struct inv{
     char name[MAX_INV_NAME];
 	char desc[MAX_INV_DESC];
 	int quantity;
 	int type;
 	double effect;
+    Usef usef;
 	struct inv *next;
-} Inv;
+};
 
 
 //the dlist is the overarching dialogue structure. contains the dlog and the next dlist (each stage of interaction is considered a dlist,
@@ -91,7 +104,7 @@ typedef struct dialogue{
 } Dialogue;
 
 //characters (including the player and monsters
-typedef struct character{
+struct character{
     char name[MAX_INV_NAME];
     int level;
 
@@ -106,9 +119,20 @@ typedef struct character{
 
 	Inv *inventory;
 	Dialogue *dialogue;
-} Character;
 
-//a list of monsters
+    Dief dief;
+    struct character *next;
+    struct character *prev;
+};
+
+//list of characters
+typedef struct character_list{
+    Character *curr;
+    Character *first;
+    Character *last;
+} Charlist;
+
+//a list of monsters (LEGACY)
 typedef struct monsters{
 	Character *monster;
 	struct monsters *next;
@@ -123,7 +147,7 @@ typedef struct dungeon{
 	double haunt;
 	double faith;
 
-	Monsters *monsters;
+	Charlist *monsters;
 	Inv *inventory;
 
 	struct dungeon *left;
@@ -147,15 +171,27 @@ void print_world(Dungeon *d, int in);
 
 void print_room(Dungeon *d);
 
-void print_monsters(Monsters *m);
+void print_monsters(Charlist *cl);
 
 void print_dialogue(Dialogue *d, char *speakerName);
 
 void print_inv(Inv *i);
 
+Inv *find_item(Inv *i, char *name);
+
+Inv *find_item_index(Inv *it, int x);
+
+int item_exists(Inv *i, char *name);
+
 void print_character(Character *p);
+
+void generate_monster_name(int length, char str[length]);
 
 int count_rooms(Dungeon *d, int c);
 
+int is_num(char *str);
+
 //DIALOGUE
 void read_dlog(char *filename);
+
+#endif
