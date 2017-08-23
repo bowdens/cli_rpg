@@ -194,17 +194,18 @@ int main(int argc, char **argv){
 		switch(id){
 			case ID_PRINT :
 				if(a->next){
+                    Character *temp;
 					if(strcmp(a->next->arg, "world") == 0){
 						print_world(start, 0);
 					}else if(strcmp(a->next->arg, "room") == 0){
 						print_room(d);
 					}else if(strcmp(a->next->arg, "inv") == 0){
 						print_inv(p->inventory);
-					}else if(strcmp(a->next->arg, p->name) == 0){
-						print_character(p);
+					}else if((temp = find_character(d->monsters, p, a->next->arg)) != NULL){
+						print_character(temp);
 					}else{
 						//there is no matching argument to be printed
-						printf("That cannot be printed\nPlease choose from 'world', 'room', '%s', and 'inv'\n",p->name);
+						printf("That cannot be printed\nPlease choose from 'world', 'room', and 'inv', or a character name (such as %s)\n",p->name);
 					}
 				}else{
 					printf("Please specify an argument eg 'print world'\n");
@@ -216,12 +217,12 @@ int main(int argc, char **argv){
                     printf("Usage: %s item (number or name), target (number or name)\n",a->arg);
                     break;
                 }
-                Inv *i;
+                Inv *i = NULL;
                 Character *target;
                 if(is_num(a->next->arg)){
                     //printf("entered a number\n");
                     if(verbose) printf("finding item through index\n");
-                    i = find_item_index(p->inventory, atoi(a->next->arg) -1);
+                    i = find_item_index(p->inventory, atoi(a->next->arg) - 1);
                 }else{
                     //printf("entered a str\n");
                     if(verbose) printf("finding item through name\n");
@@ -229,7 +230,8 @@ int main(int argc, char **argv){
                 }
                 if(is_num(a->next->next->arg)){
                     if(verbose) printf("finding character using index\n");
-                    target = find_character_index(d->monsters, p, atoi(a->next->next->arg));
+                    if(atoi(a->next->arg) == 0) target = p;
+                    else target = find_character_index(d->monsters, p, atoi(a->next->next->arg));
                 }else{
                     if(verbose) printf("finding character through name\n");
                     target = find_character(d->monsters, p, a->next->next->arg);
@@ -237,22 +239,34 @@ int main(int argc, char **argv){
 
                 //printf("Target = %p\n",target);
                 if(i == NULL){
-                   printf("You are not carrying %s\n",is_num(a->next->arg)?"that many items":strcat(is_vowel(a->next->arg[0])?"an":"a",a->next->arg));
+                   printf("You are not carrying that item\n");//%s\n",is_num(a->next->arg)?"that many items":strcat(is_vowel(a->next->arg[0])?"an":"a",a->next->arg));
                    break;
+                  // printf("You should not see this\n");
                 }
+                //printf("i is not NULL\n");
                 if(target == NULL){
-                    printf("%s does not exist\n",is_num(a->next->next->arg)?strcat("Character ", a->next->next->arg):a->next->next->arg);
+                    printf("target character does not exist\n");
                     break;
+                    //printf("you should not see this\n");
                 }
+                //printf("target is not NULL\n");
+                if(i != NULL && i->usef == NULL){
+                    printf("This item cannot be used\n");
+                    break;
+                    printf("You should not see this\n");
+                }
+                //printf("i->usef is not NULL\n");
+
                 if(target != p){
-                    if(verbose) printf("target is not self\n");
+                    //if(verbose) printf("target is not self\n");
                     d->monsters->curr = target;
                     i->usef(i, d->monsters, p);
                 }else{
-                    if(verbose) printf("target is self\n");
+                    //if(verbose) printf("target is self\n");
                     Charlist *pl = create_charlist();
                     pl->first = pl->last = pl->curr = p;
                     i->usef(i, pl, p);
+                    free(pl);
                 }
                 break;
 			case ID_A :

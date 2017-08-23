@@ -37,6 +37,7 @@
 #define DLOG_LOOT 2
 
 #define SKILL_CAP 100
+#define DEPTH_CAP 100
 
 //colour definitions
 #define C_R "\x1b[31m"
@@ -63,7 +64,8 @@ typedef void (*Dief)(void *);
 
 struct inv{
     char name[MAX_INV_NAME];
-	char desc[MAX_INV_DESC];
+	char plName[MAX_INV_NAME];
+    char desc[MAX_INV_DESC];
 	int quantity;
 	int type;
 	double effect;

@@ -1,1 +1,1 @@
-1.    on startup the core is sometimes dumped (SEED = 1503367077)
+1.    on startup the core is sometimes dumped (SEED = 1503367077) ->exceeding memory allocation

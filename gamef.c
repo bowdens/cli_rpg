@@ -69,13 +69,13 @@ void pr_i(int in){
 }
 
 void print_character(Character *p){
-	printf(C_B"%s"C_W" %.1lf/%.1lf\n",p->name, p->life, p->lifeTotal);
+	printf(C_Y"%s"C_W" %.1lf/%.1lf\n",p->name, p->life, p->lifeTotal);
 	printf("\tIntelligence: "C_Y"%.1lf\n"C_W,p->intelligence);
 	printf("\tStrength: "C_Y"%.1lf\n"C_W,p->strength);
 	printf("\tSpeed: "C_Y"%.1lf\n"C_W,p->speed);
 	printf("\tCharisma: "C_Y"%.1lf\n"C_W,p->charisma);
 	printf("\tLuck: "C_Y"%.1lf\n"C_W,p->luck);
-	printf("You are carrying:\n");
+	printf("%s is carrying:\n", p->name);
 	print_inv(p->inventory);
 }
 
@@ -93,10 +93,18 @@ Character *find_character_index(Charlist *ml, Character *p, int x){
     if(ml == NULL) return NULL;
 
     Character *t = ml->first;
-    for(int i = -1; i < x; i ++){
-        if(t == NULL) return NULL;
+    for(int i = 1; i < x; i ++){
+        if(t == NULL){
+            if(verbose) printf("Could not find character with index %d\n",x);
+            return NULL;
+        }
         t = t->next;
     }
+    if(t == NULL){
+        if(verbose) printf("Could not find character with index %d\n",x);
+        return NULL;
+    }
+    //printf("returning %s\n",t->name);
     return t;
 }
 
@@ -106,17 +114,29 @@ Character *find_character(Charlist *ml, Character *p, char *name){
     if(ml == NULL) return NULL;
     Character *t = ml->first;
     while(t){
-        if(strcmp(t->name,name) == 0) return t;
+        //printf("t = %p\n, t->name = %s, name = %s\n",t,t->name,name);
+        if(strcmp(t->name,name) == 0){
+            //printf("returning %s\n",t->name);
+            return t;
+        }
         t = t->next;
     }
+    if(verbose) printf("Could not find character with name == '%s'\n",name);
     return NULL;
 }
 
 Inv *find_item_index(Inv *i, int x){
     Inv *t = i;
     for(int a = 0; a < x; a ++){
-        if(t == NULL) return NULL;
+        if(t == NULL){
+            if(verbose) printf("Could not find item with index %d\n",x);
+            return NULL;
+        }
         t = t->next;
+    }
+    if(t == NULL){
+        if(verbose) printf("Could not find item with index %d\n",x);
+        return NULL;
     }
     return t;
 }
@@ -124,15 +144,23 @@ Inv *find_item_index(Inv *i, int x){
 Inv *find_item(Inv *i, char *name){
     if(name == NULL) return NULL;
     for(Inv *t = i; t != NULL; t = t->next){
-        if(strcmp(name, t->name) == 0) return t;
+        if(strcmp(name, t->name) == 0){
+            //printf("returning '%s'\n",t->name);
+            return t;
+        }
     }
+    if(verbose) printf("could not find item with name == '%s'\n",name);
     return NULL;
 }
 int is_num(char *str);
 void print_inv(Inv *i){
+    if(i == NULL){
+        printf("(nothing)\n");
+        return;
+    }
     int c = 1;
 	while(i){
-		printf("%d: "C_B"%s"C_W"\tTYPE: ",c,i->name);
+		printf("%d: "C_C"%d %s"C_W"\tTYPE: ",c,i->quantity,i->quantity==1?i->name:i->plName);
 		switch(i->type){
 			case ITEM_SWORD:
 				printf(C_R"sword"C_W);
@@ -151,14 +179,13 @@ void print_inv(Inv *i){
 				break;
 		}
 		printf("\n");
-		printf("\tQuantity: "C_Y"%d\n"C_W,i->quantity);
 		printf("\t%s\n",i->desc);
 		if(i->type == ITEM_SWORD){
 			printf("\tDamage: "C_R"%.1lf\n"C_W,i->effect);
 		}else if(i->type == ITEM_BOW){
 			printf("\tRanged damage: "C_R"%.0lf\n"C_W,i->effect);
 		}else if(i->type == ITEM_POTION){
-			printf("\tHealing ability: "C_R"%0.lf\n"C_W,i->effect);
+			printf("\tHealing ability: "C_G"%0.lf\n"C_W,i->effect);
 		}
 		i = i->next;
         c++;
@@ -299,7 +326,8 @@ Inv *generate_inventory(){
 	Inv *i = create_inv();
 
 	strcpy(i->name, "Rusty Sword");
-	strcpy(i->desc, "Its rusty but at least its better than your bare hands.");
+	strcpy(i->plName, "Rusty Swords");
+    strcpy(i->desc, "Its rusty but at least its better than your bare hands.");
 	i->quantity = 1;
 	i->type = ITEM_SWORD;
 	i->effect = 4.8;
@@ -308,6 +336,7 @@ Inv *generate_inventory(){
 
 	i->next = create_inv();
 	strcpy(i->next->name, "Potion of healing");
+    strcpy(i->next->plName, "Potions of healing");
 	strcpy(i->next->desc, "It will heal you if consumed");
 	i->next->quantity = 2;
 	i->next->type = ITEM_POTION;
@@ -428,6 +457,39 @@ Dialogue *generate_dialogue(char *name){
 	return p;
 }*/
 
+void split_num(int *loc1, int *loc2, int total){
+    if(total < 0){
+        *loc1 = total/2;
+        *loc2 = total/2;
+        return;
+    }
+
+    int r = rand()%(total+1);
+    *loc1 = r;
+    *loc2 = total - r;
+}
+
+void generate_stats(Character *c, int total){
+    if(c == NULL) return;
+    if(total < 0) return;
+
+    int initArr[2] = {0};
+    int midArr[4] = {0};
+    int statArr[5] = {0};
+
+    split_num(&initArr[0], &initArr[1], total);
+    split_num(&midArr[0], &midArr[1], initArr[0]);
+    split_num(&midArr[2], &midArr[3], initArr[1]);
+    for(int i = 0; i < 3; i ++) statArr[i] = midArr[i];
+    split_num(&statArr[3], &statArr[4], midArr[3]);
+
+    c->intelligence = statArr[0] + 1;
+    c->strength = statArr[1] + 1;
+    c->speed = statArr[2] + 1;
+    c->charisma = statArr[3] + 1;
+    c->luck = statArr[4] + 1;
+}
+
 Character *generate_monster(int depth){
 	Character *m = malloc(sizeof(Character));
 	assert(m);
@@ -439,12 +501,14 @@ Character *generate_monster(int depth){
 	//printf("Monster name generated: %s\n",m->name);
 	int r1 = rand()%depth + 1;
 	int r2 = rand()%depth + 1;
-	int r3 = 0;//rand()%7;
+	int r3 = rand()%depth;//rand()%7;
 	m->level = r1 * r2 + r3; //generates a random number between 0 and 70, with a bias to lower numbers
 	//printf("Monster %s's level = %d\n",m->name, m->level);
 	m->lifeTotal = m->level * 10 + rand()%10;
 	m->life = m->lifeTotal;
 	m->inventory = NULL;
+
+    generate_stats(m, depth * 5);
 
 	m->dialogue = generate_dialogue(m->name);
 
@@ -504,27 +568,28 @@ int clist_length(Clist *l){
 Clist *read_subn(char *loc){
 	//printf("\topening file %s\n",loc);
 	FILE *f = fopen(loc, "r");
-	char buffer[MAX_ROOM_SUBNAME] = {0};
+	if(f == NULL){
+        printf("FILE \"%s\" does not exist\n",loc);
+    }
+    char buffer[MAX_ROOM_SUBNAME] = {0};
 
 	Clist *l;
 	Clist *head;
 
-	if(f == NULL){
-		//printf("\tFILE %s was NULL\n",loc);
-		return NULL;
-	}
 	//first read
-	if(fgets(buffer, MAX_ROOM_SUBNAME, f)){
+	if(f != NULL && fgets(buffer, MAX_ROOM_SUBNAME, f)){
 		buffer[strcspn(buffer, "\n")] = 0;
 		l = create_clist(buffer);
 		head = l;
 		//printf("read %s\n",buffer);
 	}else{
 		//printf("\tnothing was read from %s\n",loc);
-		return NULL;
+        strcpy(buffer, "UNNAMED");
+		l = create_clist(buffer);
+        head = l;
 	}
 	//looping read
-	while(l!=NULL && fgets(buffer, MAX_ROOM_SUBNAME, f)!=NULL){
+	while(l!=NULL && f != NULL && fgets(buffer, MAX_ROOM_SUBNAME, f)!=NULL){
 		if(buffer[0] == '\n' || buffer[0] == '\0') return head;
 		//printf("    buffer had text\n");
 		buffer[strcspn(buffer, "\n")] = 0;
@@ -536,7 +601,7 @@ Clist *read_subn(char *loc){
 		//printf("     read %s\n",buffer);
 		//print_clist(head);
 	}
-	fclose(f);
+	if(f!= NULL) fclose(f);
 	//print_clist(head);
 	//printf("\n\thead = %p\n",head);
 	return head;
@@ -583,7 +648,7 @@ int monster_over_level(Charlist *m, int level, char mName[MAX_CHARACTER_NAME-10]
 }
 
 void generate_room_name(Dungeon *d, char name[MAX_ROOM_NAME]){
-	//printf("generate_room_name called\n");
+	if(verbose) printf("\t\t\tgenerate_room_name called\n");
 	int high = highest_dungeon_attrib(d, 60);
 	char prefix[MAX_ROOM_SUBNAME] = {0};
 	char room[MAX_ROOM_SUBNAME] = {0};
@@ -600,47 +665,57 @@ void generate_room_name(Dungeon *d, char name[MAX_ROOM_NAME]){
 	switch(high){
 		case ATTRIB_DAMAGE:
 			pNames = read_subn("damage_prefix.subn");
-			//printf("\troom type: damaged\n");
+			if(verbose) printf("\t\t\troom type: damaged\n");
 			break;
 		case ATTRIB_DINGE:
 			pNames = read_subn("dinge_prefix.subn");
-                        //printf("\troom type: dinge\n");
+            if(verbose) printf("\t\t\troom type: dinge\n");
 			break;
 		case ATTRIB_HAUNT:
 			pNames = read_subn("haunt_prefix.subn");
-                        //printf("\troom type: haunt\n");
+            if(verbose) printf("\t\t\troom type: haunt\n");
 			break;
 		case ATTRIB_FAITH:
 			pNames = read_subn("faith_prefix.subn");
-                        //printf("\troom type: faith\n");
+            if(verbose) printf("\t\t\troom type: faith\n");
 			break;
 		default:
 			pNames = read_subn("none_prefix.subn");
-                        //printf("\tno room type!\n");
+            if(verbose) printf("\t\t\tno room type!\n");
 			break;
 	}
-	//printf("\tread subn\n");
+	if(verbose) printf("\t\t\tread subn\n");
 	//randomise prefix
+    //if(verbose) printf("\t\t\tFinding length of char list\n");
 	clistl = clist_length(pNames);
+    //if(verbose) printf("\t\t\tLength found, = %d\n", clistl);
 	//printf("\tpNames = ");
 	//print_clist(pNames);
 	//printf("\t\tlength of clist = %d\n",clistl);
-
+    if(clistl == 0){
+        if(verbose) printf("CLISTL was 0, setting clistl to 1\n");
+        clistl = 1;
+    }
 	r = rand()%clistl;
-        for(int i = 0; i < r && pNames; i ++) pNames = pNames->next;
-        //printf("looped to random pNames\n");
+    if(verbose) printf("\t\t\tr = %d\n",r);
+    for(int i = 0; i < r && pNames->next; i ++) pNames = pNames->next;
+    //printf("\t\t\tlooped to random pNames. pNames = %p\n", pNames);
 	strcpy(prefix, pNames->text);
 	strcat(prefix, " ");
-	//printf("prefix: %s\n",prefix);
+    //if(verbose) printf("\t\t\tprefix: '%s'\n",prefix);
 
 	//room name
 	rNames = read_subn("room_names.subn");
+    //printf("read rNames, rNames = ");
+    //print_clist(rNames);
+    //printf("\n");
 	clistl = clist_length(rNames);
+    if(clistl == 0) clistl = 1;
 	r = rand()%clistl;
-	for(int i = 0; i < r && rNames; i ++) rNames = rNames->next;
-	//printf("Looped to random rName\n");
+	for(int i = 0; i < r && rNames != NULL && rNames->next != NULL; i ++) rNames = rNames->next;
+	//printf("\t\t\tLooped to random rName, rName = %p\n", rNames);
 	strcpy(room, rNames->text);
-	//printf("room: %s\n",room);
+	//if(verbose) printf("\t\t\troom: '%s'\n",room);
 
 	//suffix
 	char mName[MAX_CHARACTER_NAME-10] = {0};
@@ -650,7 +725,7 @@ void generate_room_name(Dungeon *d, char name[MAX_ROOM_NAME]){
 		strcpy(suffix, ", lair of ");
 		strcat(suffix, mName);
 	}
-	//printf("suffix: %s\n",suffix);
+	//if(verbose) printf("\t\t\tsuffix: '%s'\n",suffix);
 
 	strcpy(name, prefix);
 	strcat(name, room);
@@ -696,32 +771,47 @@ Charlist *generate_many_monsters(int num, int depth){
 Dungeon *create_room(int depth){
 	if(verbose) printf("\tcreating a room\n");
 	Dungeon *d = malloc(sizeof(Dungeon));
-	assert(d);
-	//printf("dungeon created at %p\n",d);
+	if(d == NULL){
+        printf("There was no more memory when trying to create a room\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if(depth > DEPTH_CAP){
+        if(verbose) printf("Too deep. Will not generate this\n");
+        return NULL;
+    }
+
+	//if(verbose) printf("dungeon created at %p\n",d);
 
 	d->damage = (rand()%10000)/100.0;
 	d->dinge = (rand()%10000)/100.0;
 	d->haunt = (rand()%10000)/100.0;
 	d->faith = (rand()%10000)/100.0;
-	//if(verbose) printf("\t\tattributes created\n");
+	if(verbose) printf("\t\tattributes created\n");
 
 	d->inventory = NULL;
 	//generate_inventory();
+    //if(verbose) printf("\t\tgenerating inventory\n");
 	d->inventory = generate_inventory();
-	//if(verbose) printf("\t\tgenerated inv\n");
+	//if(verbose) printf("\t\tgenerated inv\n\t\tgenerating monsters");
 	d->monsters = generate_many_monsters(rand()%4, depth);
 	//if(verbose) printf("\t\tgenerated monster\n");
 
 	//room name must be last because it is dependant on the above features
-	generate_room_name(d, d->name);
+    //if(verbose)printf("\t\tgenerating room name\n");
+    generate_room_name(d, d->name);
 	if(verbose) printf("\troom \"%s\" created\n",d->name);
 	return d;
 }
 
 Dungeon *generate_room(Dungeon *d, Dungeon *back){
 	//if(verbose) printf("\tgenerating room\n");
-	if(d == NULL) return NULL;
-	d->back = back;
+	if(d == NULL){
+        if(verbose) printf("\t\ttried to generate room, but the room given was NULL\n");
+        return NULL;
+    }
+
+    d->back = back;
     int depth = room_depth(d);
 	//create a left door
 	int r = rand()%ROOM_CO;

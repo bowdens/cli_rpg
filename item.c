@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
+
 
 void use_sword(void *inv, void *character, void *player){
     //printf("Using sword, inv = %p, character = %p\n", inv, character);
@@ -31,7 +33,7 @@ void use_sword(void *inv, void *character, void *player){
         printf(C_Y"Critical!"C_W"\n");
     }
     target->curr->life -= i->effect;
-    printf("%s dealt %.1lf damage to %s using a%s "C_B"%s"C_W". "C_R"%s"C_W" now has %.1lf/%.1lf health remaining.\n",
+    printf(C_Y"%s"C_W" dealt %.1lf damage to "C_R"%s"C_W" using a%s "C_C"%s"C_W". "C_R"%s"C_W" now has %.1lf/%.1lf health remaining.\n",
             p->name, damage, target->curr->name, is_vowel(i->name[0])?"n":"", i->name, target->curr->name, target->curr->life >= 0?target->curr->life:0,
             target->curr->lifeTotal);
     if(target->curr->life < 0.1) target->curr->dief(target);
@@ -47,7 +49,7 @@ void use_potionh(void *inv, void *character, void *player){
         printf("You do not have this item\n");
         return;
     }
-    Character *target = (Character*) character;
+    Charlist *target = (Charlist*) character;
     if(target == NULL){
         printf("Your target does not exist\n");
         return;
@@ -62,7 +64,11 @@ void use_potionh(void *inv, void *character, void *player){
         return;
     }
     i->quantity -= 1;
-    double heal = cap(i->effect, target->lifeTotal - target->life);
-    printf("You healed %s for "C_Y"%.1lf"C_W" health\n",character == player ? "yourself":target->name, heal);
-    target->life += heal;
+    double heal = cap(i->effect, target->curr->lifeTotal - target->curr->life);
+    //printf("healing %p: %s\n",target->curr, target->curr->name);
+    target->curr->life += heal;
+    printf("You healed %s for "C_Y"%.1lf"C_W" health. %s %.1lf/%.1lf health remaining.\n",
+            target->curr == p ? "yourself":target->curr->name, heal, target->curr == p ? "You now have":strcat(target->curr->name, "now has"),
+            target->curr->life, target->curr->lifeTotal);
+    printf("You have "C_Y"%d"C_W" remaining %s\n",i->quantity,i->quantity == 1?i->name:i->plName);
 }
