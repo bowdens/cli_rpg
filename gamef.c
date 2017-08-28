@@ -9,9 +9,26 @@
 #include <ctype.h>
 #include "item.h"
 #include "die.h"
+#include "race.h"
+#include "glItemList.h"
 
 // 1/ROOM_CO chance of generating a room to the left/right/foward
 #define ROOM_CO 3
+
+//global itemlist
+GlItemList *glItems = NULL;
+
+void init_glItemList(void){
+    glItems = append_glItemList(create_inv_element("Rusty Sword", "Rusty Swords", "At least its better than your hands", 1, item_sword(), 4.8, 5,  use_sword));
+    glItems = append_glItemList(create_inv_element("Potion of Minor Healing", "Potions of Minor Healing", "A faintly glowing blue liquid", 1, item_hPotion(), 12, 20, use_potionh));
+    glItems = append_glItemList(create_inv_element("Claw","Claws","They look like they could do some damage",1,item_melee(), 5, 3, use_sword));
+    glItems = append_glItemList(create_inv_element("Steel Sword", "Steel Swords", "Its sharp and in pretty good condition",1, item_sword(), 9.2, 45, use_sword));
+    if(verbose){
+        printf("item list is: ");
+        print_glItems();
+        printf("\n");
+    }
+}
 
 typedef struct nameholder{
 	char name[MAX_ROOM_NAME];
@@ -69,14 +86,14 @@ void pr_i(int in){
 }
 
 void print_character(Character *p){
-	printf(C_Y"%s"C_W" %.1lf/%.1lf\n",p->name, p->life, p->lifeTotal);
-	printf("\tIntelligence: "C_Y"%.1lf\n"C_W,p->intelligence);
-	printf("\tStrength: "C_Y"%.1lf\n"C_W,p->strength);
-	printf("\tSpeed: "C_Y"%.1lf\n"C_W,p->speed);
-	printf("\tCharisma: "C_Y"%.1lf\n"C_W,p->charisma);
-	printf("\tLuck: "C_Y"%.1lf\n"C_W,p->luck);
+	printf(C_Y"%s"C_W" (%s) %.1lf/%.1lf\n",p->name,p->race->name, p->life, p->lifeTotal);
+	printf("\t"C_C"Intelligence"C_W": "C_Y"%.1lf\n"C_W,p->intelligence);
+	printf("\t"C_C"Strength"C_W": "C_Y"%.1lf\n"C_W,p->strength);
+	printf("\t"C_C"Speed"C_W": "C_Y"%.1lf\n"C_W,p->speed);
+	printf("\t"C_C"Charisma"C_W": "C_Y"%.1lf\n"C_W,p->charisma);
+	printf("\t"C_C"Luck"C_W": "C_Y"%.1lf\n"C_W,p->luck);
 	printf("%s is carrying:\n", p->name);
-	print_inv(p->inventory);
+	print_inventory(p->inventory);
 }
 
 int item_exists(Inv *i, char *name){
@@ -152,7 +169,23 @@ Inv *find_item(Inv *i, char *name){
     if(verbose) printf("could not find item with name == '%s'\n",name);
     return NULL;
 }
+
+Inv *add_to_inv(Inv *toAdd, Inv *i){
+    if(toAdd == NULL) return i;
+    if(i == NULL) return toAdd;
+    if(find_item(i, toAdd->name)){
+        find_item(i, toAdd->name)->quantity += toAdd->quantity;
+        free(toAdd);
+        return i;
+    }
+    Inv *temp;
+    for(temp = i; temp->next!= NULL; temp = temp->next);
+    temp->next = toAdd;
+    return i;
+}
+
 int is_num(char *str);
+
 void print_inv(Inv *i){
     if(i == NULL){
         printf("(nothing)\n");
@@ -160,36 +193,54 @@ void print_inv(Inv *i){
     }
     int c = 1;
 	while(i){
-		printf("%d: "C_C"%d %s"C_W"\tTYPE: ",c,i->quantity,i->quantity==1?i->name:i->plName);
-		switch(i->type){
-			case ITEM_SWORD:
-				printf(C_R"sword"C_W);
-				break;
-			case ITEM_BOW:
-				printf(C_R"bow"C_W);
-				break;
-			case ITEM_RING:
-				printf(C_C"ring"C_W);
-				break;
-			case ITEM_GOLD:
-				printf(C_Y"gold"C_W);
-				break;
-			case ITEM_POTION:
-				printf(C_G"potion"C_W);
-				break;
-		}
-		printf("\n");
-		printf("\t%s\n",i->desc);
-		if(i->type == ITEM_SWORD){
-			printf("\tDamage: "C_R"%.1lf\n"C_W,i->effect);
-		}else if(i->type == ITEM_BOW){
-			printf("\tRanged damage: "C_R"%.0lf\n"C_W,i->effect);
-		}else if(i->type == ITEM_POTION){
-			printf("\tHealing ability: "C_G"%0.lf\n"C_W,i->effect);
-		}
-		i = i->next;
+		printf("%d: "C_Y"%d"C_C" %s"C_W"\tTYPE: "C_B"%s"C_W"\n",c,i->quantity,i->quantity==1?i->name:i->plName, i->type->name);
+		printf("\t\"%s\"\n",i->desc);
+		printf("\t%s: "C_Y"%.1lf"C_W"\n",i->type->effectDesc,i->effect);
+        i = i->next;
         c++;
 	}
+}
+
+void print_equipped(Equipped *e){
+    printf(C_B"Right hand:"C_W"\n");
+    e==NULL?printf("nothing\n"):print_inv(e->rHand);
+
+    printf(C_B"Left hand:"C_W"\n");
+    e==NULL?printf("nothing\n"):print_inv(e->lHand);
+
+    printf(C_B"Head:\n"C_W);
+    e==NULL?printf("nothing\n"):print_inv(e->head);
+
+    printf(C_B"Torso:\n"C_W);
+    e==NULL?printf("nothing\n"):print_inv(e->torso);
+
+    printf(C_B"Arms:\n"C_W);
+    e==NULL?printf("nothing\n"):print_inv(e->arms);
+
+    printf(C_B"Legs:\n"C_W);
+    e==NULL?printf("nothing\n"):print_inv(e->legs);
+
+    printf(C_B"Feet:\n"C_W);
+    e==NULL?printf("nothing\n"):print_inv(e->feet);
+}
+
+void print_inventory(Items *i){
+    if(i == NULL) {
+        printf("Nothing\n");
+        return;
+    }
+    //printf("Items Equipped:\n");
+    print_equipped(i->equip);
+    printf("Items in Inventory:\n");
+    print_inv(i->inv);
+}
+
+void print_race(Race *r){
+    if(r == NULL){
+        printf("Error: Race entered was NULL\n");
+        return;
+    }
+    printf("%s: %s\n",r->name,r->desc);
 }
 
 void print_world(Dungeon *d, int in){
@@ -304,7 +355,7 @@ void print_room(Dungeon *d){
 		printf("\n"C_B"Right" C_W ":\t" C_G "%s" C_W, d->right->name);
 	}
 
-	if(d->monsters == NULL){
+	if(d->monsters == NULL || count_monsters(d->monsters) == 0){
 		printf("\n\nThere are no "C_R"monsters"C_W"\n");
 	}else{
 		printf("\n\nThere are %d "C_R"monsters"C_W" in this room, they are:\n", count_monsters(d->monsters));
@@ -319,30 +370,39 @@ Inv *create_inv(){
 	Inv *i = malloc(sizeof(Inv));
 	assert(i);
 	i->next = NULL;
+    strcpy(i->name, "UNNAMED");
+    strcpy(i->plName, "UNNAMEDS");
+    i->quantity = 0;
+    i->type = NULL;
+    i->effect = 0;
+    i->usef = NULL;
 	return i;
 }
 
 Inv *generate_inventory(){
 	Inv *i = create_inv();
 
-	strcpy(i->name, "Rusty Sword");
-	strcpy(i->plName, "Rusty Swords");
-    strcpy(i->desc, "Its rusty but at least its better than your bare hands.");
-	i->quantity = 1;
-	i->type = ITEM_SWORD;
-	i->effect = 4.8;
-    i->usef = use_sword;
+    i = get_glItem_name("Rusty Sword");
+    assert(i);
+    printf("added rsuty sword\n");
 
+    i->next = get_glItem_name("Potion of Minor Healing");
+    assert(i->next);
+    i->next->quantity = 3;
+    printf("added potion\n");
 
-	i->next = create_inv();
-	strcpy(i->next->name, "Potion of healing");
-    strcpy(i->next->plName, "Potions of healing");
-	strcpy(i->next->desc, "It will heal you if consumed");
-	i->next->quantity = 2;
-	i->next->type = ITEM_POTION;
-	i->next->effect = 20;
-    i->next->usef = use_potionh;
+    i->next->next = get_glItem_name("Steel Sword");
+    assert(i->next->next);
+    printf("added steel sword\n");
+
+    i->next->next->next = NULL;
+
 	return i;
+}
+
+Inv *generate_inventory_dungeon(void){
+    Inv *i = create_inv();
+    return i;
 }
 
 /*void use_item(Inv *i, Character *c, Character *p){
@@ -490,6 +550,16 @@ void generate_stats(Character *c, int total){
     c->luck = statArr[4] + 1;
 }
 
+//add items function here
+
+Items *create_items(void){
+    Items *it = malloc(sizeof(Items));
+    assert(it);
+    it->inv = NULL;
+    it->equip = NULL;
+    return it;
+}
+
 Character *generate_monster(int depth){
 	Character *m = malloc(sizeof(Character));
 	assert(m);
@@ -506,9 +576,17 @@ Character *generate_monster(int depth){
 	//printf("Monster %s's level = %d\n",m->name, m->level);
 	m->lifeTotal = m->level * 10 + rand()%10;
 	m->life = m->lifeTotal;
-	m->inventory = NULL;
+
+    m->inventory = create_items();
+
+    m->inventory->inv = get_glItem_name("Claw");
+    assert(m->inventory->inv);
+
+    m->inventory->inv->next = get_glItem_name("Potion of Minor Healing");
 
     generate_stats(m, depth * 5);
+
+    m->race = rand()%3?race_kaskeer():race_voidwretch();
 
 	m->dialogue = generate_dialogue(m->name);
 
@@ -792,7 +870,7 @@ Dungeon *create_room(int depth){
 	d->inventory = NULL;
 	//generate_inventory();
     //if(verbose) printf("\t\tgenerating inventory\n");
-	d->inventory = generate_inventory();
+	d->inventory = generate_inventory_dungeon();
 	//if(verbose) printf("\t\tgenerated inv\n\t\tgenerating monsters");
 	d->monsters = generate_many_monsters(rand()%4, depth);
 	//if(verbose) printf("\t\tgenerated monster\n");
@@ -894,11 +972,11 @@ int get_player_stat(char *stat, int *totalPoints, int *remainingPoints){
     //returns a value entered by the user which is lower than the remaining points. reduces the remaining points by the value entered
     //only accepts integers >= 0
     if(*remainingPoints <= 0){
-        printf("\nYou have 0 points left to spend. Setting %s to 0.\n",stat);
+        printf("\nYou have 0 points left to spend. Setting "C_C"%s"C_W" to 0.\n",stat);
         return 0;
     }
 
-    printf("\nYou have %d/%d points to spend.\nEnter your %s: ",*remainingPoints, *totalPoints, stat);
+    printf("\nYou have %d/%d points to spend.\nEnter your "C_C"%s"C_W": ",*remainingPoints, *totalPoints, stat);
 
     int point = *totalPoints;
     char inputPoint[100] = {0};
@@ -906,7 +984,7 @@ int get_player_stat(char *stat, int *totalPoints, int *remainingPoints){
         fgets(inputPoint, 100, stdin);
         //printf("You entered %s = %d\n",inputPoint, atoi(inputPoint));
         if(!is_num(inputPoint) || atoi(inputPoint) < 0 || atoi(inputPoint) > *remainingPoints){
-            printf("\nError: You entered an invalid value for %s. You have %d/%d points left to spend.\nEnter your %s: ",stat, *remainingPoints, *totalPoints, stat);
+            printf("\nError: You entered an invalid value for "C_C"%s"C_W". You have %d/%d points left to spend.\nEnter your "C_C"%s"C_W": ",stat, *remainingPoints, *totalPoints, stat);
         }else{
             point = atoi(inputPoint);
             break;
@@ -925,6 +1003,33 @@ void generate_player_stats(Character *p, int totalPoints){
     p->speed = get_player_stat("speed", &totalPoints, &remainingPoints);
     p->charisma = get_player_stat("charisma", &totalPoints, &remainingPoints);
     p->luck = get_player_stat("luck", &totalPoints, &remainingPoints);
+}
+
+Items *generate_player_items(void){
+    Items *i = malloc(sizeof(Items));
+    assert(i);
+    i->inv = NULL;
+    i->equip = NULL;
+    return i;
+}
+
+Inv *remove_from_inv(int index, Inv *inv){
+    if(inv == NULL) return NULL;
+    Inv *temp = inv;
+    if(index == 0){
+        inv = inv->next;
+        return temp;
+    }
+    int i = 0;
+    Inv *prev = inv;
+    for(temp = inv, i = 0; temp != NULL; temp = temp->next, i++){
+        if(i == index){
+            prev->next = temp->next;
+            return temp;
+        }
+        prev = temp;
+    }
+    return NULL;
 }
 
 //initiialise the player
@@ -960,10 +1065,11 @@ Character *generate_player(char *parName){
     }
     strcpy(p->name, name);
 
-    p->inventory = generate_inventory();
+    p->inventory = generate_player_items();
+    p->inventory->inv = generate_inventory();
     p->lifeTotal = 100;
     p->life = p->lifeTotal;
     generate_player_stats(p,25);
-
+    p->race = race_human();
 	return p;
 }

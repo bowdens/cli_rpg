@@ -1,5 +1,5 @@
 #ifndef __GAME_H
-#define __GAME_G 1
+#define __GAME_H 1
 
 //Maximum string lengths
 #define MAX_ROOM_NAME 256
@@ -39,6 +39,18 @@
 #define SKILL_CAP 100
 #define DEPTH_CAP 100
 
+#define BLOC_HEAD 1
+#define BLOC_TORSO 2
+#define BLOC_LEGS 3
+#define BLOC_ARMS 4
+#define BLOC_LHAND 5
+#define BLOC_RHAND 6
+#define BLOC_FEET 7
+
+#define MONST_AGGRO 1
+#define MONST_PASSIVE 0
+#define MONST_DEFENSIVE 2
+
 //colour definitions
 #define C_R "\x1b[31m"
 #define C_G "\x1b[32m"
@@ -62,16 +74,44 @@ typedef struct character Character;
 typedef void (*Usef)(void*, void*, void*);
 typedef void (*Dief)(void *);
 
+typedef struct itemType{
+    char name[MAX_INV_NAME]; //name of the type (eg sword)
+    char plName[MAX_INV_NAME]; //here swords
+    char effectDesc[MAX_INV_DESC]; //eg for a sword damage, for a potion healing ability
+    int bodyLocation; //eg BLOC_HEAD, BLOC_HAND1
+} ItemType;
+
 struct inv{
     char name[MAX_INV_NAME];
 	char plName[MAX_INV_NAME];
     char desc[MAX_INV_DESC];
 	int quantity;
-	int type;
+	ItemType *type;
 	double effect;
+    double value;
     Usef usef;
 	struct inv *next;
 };
+
+typedef struct glItemList{
+    Inv *first;
+    Inv *last;
+} GlItemList;
+
+typedef struct equipped{
+    Inv *head;
+    Inv *torso;
+    Inv *arms;
+    Inv *legs;
+    Inv *feet;
+    Inv *lHand;
+    Inv *rHand;
+} Equipped;
+
+typedef struct items{
+    Inv *inv;
+    Equipped *equip;
+} Items;
 
 
 //the dlist is the overarching dialogue structure. contains the dlog and the next dlist (each stage of interaction is considered a dlist,
@@ -105,6 +145,12 @@ typedef struct dialogue{
 	struct dialogue *optionD;
 } Dialogue;
 
+typedef struct race{
+    char name[MAX_INV_NAME];
+    char plName[MAX_INV_NAME];
+    char desc[MAX_INV_DESC];
+} Race;
+
 //characters (including the player and monsters
 struct character{
     char name[MAX_INV_NAME];
@@ -119,7 +165,11 @@ struct character{
 	double charisma;
 	double luck;
 
-	Inv *inventory;
+    int isAgressive;
+
+    Race *race;
+
+	Items *inventory;
 	Dialogue *dialogue;
 
     Dief dief;
@@ -179,6 +229,12 @@ void print_dialogue(Dialogue *d, char *speakerName);
 
 void print_inv(Inv *i);
 
+void print_equipped(Equipped *e);
+
+void print_inventory(Items *i);
+
+void print_race(Race *r);
+
 Character *find_character_index(Charlist *ml, Character *p, int x);
 
 Character *find_character(Charlist *ml, Character *p, char *name);
@@ -198,6 +254,8 @@ void generate_monster_name(int length, char str[length]);
 int count_rooms(Dungeon *d, int c);
 
 int is_num(char *str);
+
+void init_glItemList(void);
 
 //DIALOGUE
 void read_dlog(char *filename);

@@ -7,6 +7,8 @@
 #include <string.h>
 #include "tomlib.h"
 
+#include "race.h"
+
 #define ID_LEFT 1
 #define ID_RIGHT 2
 #define ID_FOWARD 3
@@ -128,9 +130,14 @@ int main(int argc, char **argv){
     set_lt_verbose(return_flag_argument(argc, argv, "-ltVerbose="));
 
     if(verbose) printf("starting game\n");
-	Commands *c = init_command_list();
-	if(verbose) printf(" - initialised standard commands\n");
-	init_c(c);
+
+    init_glItemList();
+    if(verbose) printf(" - initialised item list\n");
+
+    Commands *c = init_command_list();
+    if(verbose) printf(" - initialised standard commands\n");
+
+    init_c(c);
 	if(verbose) printf(" - initialised custom commands\n");
 
 	Arg *a = malloc(sizeof(Arg));
@@ -195,15 +202,18 @@ int main(int argc, char **argv){
 			case ID_PRINT :
 				if(a->next){
                     Character *temp;
+                    Race *tempR;
 					if(strcmp(a->next->arg, "world") == 0){
 						print_world(start, 0);
 					}else if(strcmp(a->next->arg, "room") == 0){
 						print_room(d);
 					}else if(strcmp(a->next->arg, "inv") == 0){
-						print_inv(p->inventory);
+						print_inventory(p->inventory);
 					}else if((temp = find_character(d->monsters, p, a->next->arg)) != NULL){
 						print_character(temp);
-					}else{
+					}else if((tempR = find_race(a->next->arg)) != NULL){
+                        print_race(tempR);
+                    }else{
 						//there is no matching argument to be printed
 						printf("That cannot be printed\nPlease choose from 'world', 'room', and 'inv', or a character name (such as %s)\n",p->name);
 					}
@@ -222,11 +232,11 @@ int main(int argc, char **argv){
                 if(is_num(a->next->arg)){
                     //printf("entered a number\n");
                     if(verbose) printf("finding item through index\n");
-                    i = find_item_index(p->inventory, atoi(a->next->arg) - 1);
+                    i = find_item_index(p->inventory->inv, atoi(a->next->arg) - 1);
                 }else{
                     //printf("entered a str\n");
                     if(verbose) printf("finding item through name\n");
-                    i = find_item(p->inventory, a->next->arg);
+                    i = find_item(p->inventory->inv, a->next->arg);
                 }
                 if(is_num(a->next->next->arg)){
                     if(verbose) printf("finding character using index\n");
