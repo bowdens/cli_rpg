@@ -1,0 +1,444 @@
+    printf("%s died\n", p->name);
+    printf(C_R"%s"C_W" died\n",ml->curr->name);
+    if(ml->curr == NULL) return;
+    if(ml->curr == ml->first && ml->curr == ml->last){
+        free(ml->curr);
+        ml->curr = NULL;
+        ml->first = NULL;
+        ml->last = NULL;
+    }else if(ml->curr == ml->first){
+        ml->curr = ml->curr->next;
+        free(ml->first);
+        ml->first = ml->curr;
+        ml->curr->prev = NULL;
+    }else if(ml->curr == ml->last){
+        ml->curr = ml->curr->prev;
+        ml->curr->next = NULL;
+        free(ml->last);
+        ml->last = ml->curr;
+        Character *temp = ml->curr;
+        ml->curr = ml->curr->next;
+        ml->curr->prev = temp->prev;
+        temp->prev->next = ml->curr;
+        		if(d->left){
+        			d = d->left;
+        		if(d->right){
+        			d = d->right;
+        	        if(d->foward){
+        	        	d = d->foward;
+        		if(d->back){
+        			d = d->back;
+    return -1;
+        if(argv[i][0] == '-'){
+    set_lt_verbose(return_flag_argument(argc, argv, "-ltVerbose="));
+    if(verbose) printf(" - initialised item list\n");
+    if(verbose) printf(" - initialised standard commands\n");
+	if(verbose) printf(" - initialised custom commands\n");
+	a->id = 0;
+	if(verbose) printf(" - allocated argument memory\n");
+        int seed_num = return_flag_argument(argc, argv, "-seed=");
+	printf("%sseed = %d\n",verbose?" - ":"> ",seed);
+	if(verbose) printf(" - generated dungeon\n");
+	if(verbose) printf(" - designated starting room\n");
+    char *tempName = char_return_flag_argument(argc, argv, "-name=");
+	if(verbose) printf(" - name from commandline read\n");
+    if(verbose) printf(" - Generating player\n");
+	//p->luck = SKILL_CAP;
+    if(verbose) printf("Welcome %s\n",p->name);
+    if(verbose) printf(" - Character generated\n");
+	if(verbose) printf(" - This world has %d rooms\n", count_rooms(start, 0));
+		if(a->id == 0 || a->id == ID_LEFT || a->id == ID_RIGHT || a->id == ID_FOWARD || (a->id == ID_BACK && d != start/*TODO change so it prints from depth =2*/)){
+		int id = a->id;
+				if(a->next){
+					if(strcmp(a->next->arg, "world") == 0){
+					}else if(strcmp(a->next->arg, "room") == 0){
+					}else if(strcmp(a->next->arg, "inv") == 0){
+						print_inventory(p->inventory);
+					}else if((temp = find_character(d->monsters, p, a->next->arg)) != NULL){
+					}else if((tempR = find_race(a->next->arg)) != NULL){
+						printf("That cannot be printed\nPlease choose from 'world', 'room', and 'inv', or a character name (such as %s)\n",p->name);
+                if(a->next == NULL || a->next->next == NULL){
+                    printf("Usage: %s item (number or name), target (number or name)\n",a->arg);
+                if(is_num(a->next->arg)){
+                    i = find_item_index(p->inventory->inv, atoi(a->next->arg) - 1);
+                    i = find_item(p->inventory->inv, a->next->arg);
+                if(is_num(a->next->next->arg)){
+                    if(atoi(a->next->arg) == 0) target = p;
+                    else target = find_character_index(d->monsters, p, atoi(a->next->next->arg));
+                    target = find_character(d->monsters, p, a->next->next->arg);
+                   printf("You are not carrying that item\n");//%s\n",is_num(a->next->arg)?"that many items":strcat(is_vowel(a->next->arg[0])?"an":"a",a->next->arg));
+                if(i != NULL && i->usef == NULL){
+                //printf("i->usef is not NULL\n");
+                    d->monsters->curr = target;
+                    i->usef(i, d->monsters, p);
+                    pl->first = pl->last = pl->curr = p;
+                    i->usef(i, pl, p);
+				if(d && d->monsters && d->monsters->first && d->monsters->first->dialogue &&  d->monsters->first->dialogue->optionAText[0] != '\0'){
+					printf("%s\n",d->monsters->first->dialogue->optionAText);
+					d->monsters->first->dialogue = d->monsters->first->dialogue->optionA;
+					print_dialogue(d->monsters->first->dialogue, d->monsters->first->name);
+                if(d && d->monsters && d->monsters->first && d->monsters->first->dialogue && d->monsters->first->dialogue->optionBText[0] != '\0'){
+                    printf("%s\n",d->monsters->first->dialogue->optionBText);
+                    d->monsters->first->dialogue = d->monsters->first->dialogue->optionB;
+                    print_dialogue(d->monsters->first->dialogue, d->monsters->first->name);
+                if(d && d->monsters && d->monsters->first && d->monsters->first->dialogue && d->monsters->first->dialogue->optionCText[0] != '\0'){
+                    printf("%s\n",d->monsters->first->dialogue->optionCText);
+                    d->monsters->first->dialogue = d->monsters->first->dialogue->optionC;
+                    print_dialogue(d->monsters->first->dialogue, d->monsters->first->name);
+                if(d && d->monsters && d->monsters->first && d->monsters->first->dialogue && d->monsters->first->dialogue->optionDText[0] != '\0'){
+                    printf("%s\n",d->monsters->first->dialogue->optionDText);
+                    d->monsters->first->dialogue = d->monsters->first->dialogue->optionD;
+                    print_dialogue(d->monsters->first->dialogue, d->monsters->first->name);
+        c = c->next;
+    free(l->first);
+	c += count_rooms(d->left, c);
+	c += count_rooms(d->right, c);
+	c += count_rooms(d->foward, c);
+    while(d->back != NULL){
+        d = d->back;
+	printf(C_Y"%s"C_W" (%s) %.1lf/%.1lf\n",p->name,p->race->name, p->life, p->lifeTotal);
+	printf("\t"C_C"Intelligence"C_W": "C_Y"%.1lf\n"C_W,p->intelligence);
+	printf("\t"C_C"Strength"C_W": "C_Y"%.1lf\n"C_W,p->strength);
+	printf("\t"C_C"Speed"C_W": "C_Y"%.1lf\n"C_W,p->speed);
+	printf("\t"C_C"Charisma"C_W": "C_Y"%.1lf\n"C_W,p->charisma);
+	printf("\t"C_C"Luck"C_W": "C_Y"%.1lf\n"C_W,p->luck);
+	printf("%s is carrying:\n", p->name);
+	print_inventory(p->inventory);
+    for(Inv *t = i; t != NULL; t = t->next){
+        if(strcmp(name, t->name) == 0) return 1;
+    Character *t = ml->first;
+        t = t->next;
+    //printf("returning %s\n",t->name);
+    if(p != NULL && strcmp(p->name, name) == 0) return p;
+    Character *t = ml->first;
+        //printf("t = %p\n, t->name = %s, name = %s\n",t,t->name,name);
+        if(strcmp(t->name,name) == 0){
+            //printf("returning %s\n",t->name);
+        t = t->next;
+        t = t->next;
+    for(Inv *t = i; t != NULL; t = t->next){
+        if(strcmp(name, t->name) == 0){
+            //printf("returning '%s'\n",t->name);
+    if(find_item(i, toAdd->name)){
+        find_item(i, toAdd->name)->quantity += toAdd->quantity;
+    for(temp = i; temp->next!= NULL; temp = temp->next);
+    temp->next = toAdd;
+		printf("%d: "C_Y"%d"C_C" %s"C_W"\tTYPE: "C_B"%s"C_W"\n",c,i->quantity,i->quantity==1?i->name:i->plName, i->type->name);
+		printf("\t\"%s\"\n",i->desc);
+		printf("\t%s: "C_Y"%.1lf"C_W"\n",i->type->effectDesc,i->effect);
+        i = i->next;
+    e==NULL?printf("nothing\n"):print_inv(e->rHand);
+    e==NULL?printf("nothing\n"):print_inv(e->lHand);
+    e==NULL?printf("nothing\n"):print_inv(e->head);
+    e==NULL?printf("nothing\n"):print_inv(e->torso);
+    e==NULL?printf("nothing\n"):print_inv(e->arms);
+    e==NULL?printf("nothing\n"):print_inv(e->legs);
+    e==NULL?printf("nothing\n"):print_inv(e->feet);
+    print_equipped(i->equip);
+    print_inv(i->inv);
+    printf("%s: %s\n",r->name,r->desc);
+	printf(C_G "%s"C_W" (%c)\n",d->name, c);
+	if(d->left){
+		print_world(d->left, in + 1);
+	if(d->right){
+		print_world(d->right, in + 1);
+	if(d->foward){
+		print_world(d->foward, in + 1);
+	for(Character *c = cl->first; c != NULL; c = c->next){
+	for(Character *m = ml->first; m != NULL; m = m->next, i++){
+		printf("%d: "C_R"%s"C_W"\t(level %d)\n\t%.1lf/%.1lf\n",i, m->name, m->level,m->life, m->lifeTotal);
+	printf(C_R"%s"C_W": \"%s\"\n",speakerName, d->text);
+	if(d->optionAText[0] != '\0'){
+		printf("\tA: %s\n",d->optionAText);
+	if(d->optionBText[0] != '\0'){
+		printf("\tB: %s\n",d->optionBText);
+	if(d->optionCText[0] != '\0'){
+		printf("\tC: %s\n",d->optionCText);
+	if(d->optionDText[0] != '\0'){
+		printf("\tD: %s\n",d->optionDText);
+	if(is_vowel(d->name[0])){
+	printf(C_G"%s"C_W".\t\tDepth = %d\n",d->name, room_depth(d));
+	printf("damage:\t%.2lf\n",d->damage);
+	printf("dinge:\t%.2lf\n",d->dinge);
+	printf("haunt:\t%.2lf\n",d->haunt);
+	printf("faith:\t%.2lf\n",d->faith);
+	//print_dialogue(d->monsters->monster->dialogue);
+	if(d->back == NULL){
+		printf("\n" C_C"Back" C_W":\t" C_G "%s" C_W,d->back->name);
+	if(d->foward){
+		printf("\n"C_M"Foward"C_W ":\t"C_G"%s" C_W, d->foward->name);
+	if(d->left){
+		printf("\n"C_Y"Left"C_W ":\t" C_G "%s" C_W, d->left->name);
+	if(d->right){
+		printf("\n"C_B"Right" C_W ":\t" C_G "%s" C_W, d->right->name);
+	if(d->monsters == NULL || count_monsters(d->monsters) == 0){
+		printf("\n\nThere are %d "C_R"monsters"C_W" in this room, they are:\n", count_monsters(d->monsters));
+		print_monsters(d->monsters);
+	if(d->monsters && d->monsters->first && d->monsters->first->dialogue){
+		print_dialogue(d->monsters->first->dialogue, d->monsters->first->name);
+	i->next = NULL;
+    strcpy(i->name, "UNNAMED");
+    strcpy(i->plName, "UNNAMEDS");
+    i->quantity = 0;
+    i->type = NULL;
+    i->effect = 0;
+    i->usef = NULL;
+    i->next = get_glItem_name("Potion of Minor Healing");
+    assert(i->next);
+    i->next->quantity = 3;
+    i->next->next = get_glItem_name("Steel Sword");
+    assert(i->next->next);
+    i->next->next->next = NULL;
+    i->usef(i, c, p);
+	d->optionA = NULL;
+	d->optionB = NULL;
+	d->optionC = NULL;
+	d->optionD = NULL;
+	strcpy(d->text, "I am ");
+	strcat(d->text, name);
+	strcat(d->text, ", fear me!");
+	strcpy(d->optionAText, "Please. Let me live!");
+	strcpy(d->optionBText, "No, ");
+	strcat(d->optionBText, name);
+	strcat(d->optionBText, ", fear me!");
+	strcpy(d->optionCText, "I am unimpressed");
+	strcpy(d->optionDText, "I will fight you to the death!");
+	d->optionD = create_dialogue();
+	strcpy(d->optionD->text, "So be it!");
+	d->optionA = create_dialogue();
+	strcpy(d->optionA->text, "Hahaha, not likely, fool!");
+	d->optionB = create_dialogue();
+	strcpy(d->optionB->text, "Arrogant creature, prepare yourself for battle!");
+	d->optionC = create_dialogue();
+	strcpy(d->optionC->text, "And I am unimpressed by you. Now face me in combat!");
+	strcpy(p->name, name);
+    *loc2 = total - r;
+    c->intelligence = statArr[0] + 1;
+    c->strength = statArr[1] + 1;
+    c->speed = statArr[2] + 1;
+    c->charisma = statArr[3] + 1;
+    c->luck = statArr[4] + 1;
+    it->inv = NULL;
+    it->equip = NULL;
+	generate_monster_name(rand()%5 + 3, m->name);
+	//printf("Monster name generated: %s\n",m->name);
+	m->level = r1 * r2 + r3; //generates a random number between 0 and 70, with a bias to lower numbers
+	//printf("Monster %s's level = %d\n",m->name, m->level);
+	m->lifeTotal = m->level * 10 + rand()%10;
+	m->life = m->lifeTotal;
+    m->inventory = create_items();
+    m->inventory->inv = NULL;
+    m->inventory->inv = get_glItem_name("Claw");
+    assert(m->inventory->inv);
+    m->inventory->inv->next = get_glItem_name("Potion of Minor Healing");
+    assert(m->inventory->inv->next);
+    m->race = rand()%3?race_kaskeer():race_voidwretch();
+	m->dialogue = generate_dialogue(m->name);
+    m->dief = monster_die;
+    m->next = NULL;
+    m->prev = NULL;
+	if(d->damage >= d->dinge && d->damage >= d->haunt && d->damage >=d->faith && d->damage > minAttrib){
+	}else if(d->dinge > d->damage && d->dinge > d->haunt && d->dinge > d->faith && d->dinge > minAttrib){
+	}else if(d->haunt > d->damage && d->haunt > d->dinge && d->haunt > d->faith && d->haunt > minAttrib){
+	}else if(d->faith > d->damage && d->faith > d->dinge && d->faith > d->haunt && d->faith > minAttrib){
+	l->next = NULL;
+	strcpy(l->text, text);
+	//printf("created clist node at %p with text %s\n",l, l->text);
+		printf("%s",l->text);
+		if(l->next){
+		l = l->next;
+		l = l->next;
+		l->next = create_clist(buffer);
+		//printf("    set l->next to %p\n",l->next);
+		l = l->next;
+		l = l->next;
+int monster_over_level(Charlist *m, int level, char mName[MAX_CHARACTER_NAME-10]){
+	//use MAX_CHARACTER_NAME-10 since ", lair of " is 10 chars long
+	//printf(", m->monster = %p\n",m->monster);
+	if(m->first == NULL) return 0;
+	//printf("\tm->monster is not null\n");
+	char maxName[MAX_CHARACTER_NAME-10] = {0};
+	int maxLevel = level - 1;
+	for(Character *curr = m->first; curr != NULL; curr = curr->next){
+		if(curr->level > maxLevel){
+			//printf("monster %s has a higher level than the previous max %d, at %d\n",m->monster->name,maxLevel, m->monster->level);
+			strcpy(maxName, curr->name);
+			maxLevel = curr->level;
+	strncpy(mName,maxName, MAX_CHARACTER_NAME-10);
+    for(int i = 0; i < r && pNames->next; i ++) pNames = pNames->next;
+	strcpy(prefix, pNames->text);
+	for(int i = 0; i < r && rNames != NULL && rNames->next != NULL; i ++) rNames = rNames->next;
+	strcpy(room, rNames->text);
+	char mName[MAX_CHARACTER_NAME-10] = {0};
+	if(monster_over_level(d->monsters, 30, mName)){
+    if(ml->last == NULL){
+        ml->first = m;
+        ml->last = m;
+        ml->curr = m;
+    ml->last->next = m;
+    ml->last->next->prev = ml->last;
+    ml->last = m;
+    cl->first = NULL;
+    cl->curr = NULL;
+    cl->last = NULL;
+	d->damage = (rand()%10000)/100.0;
+	d->dinge = (rand()%10000)/100.0;
+	d->haunt = (rand()%10000)/100.0;
+	d->faith = (rand()%10000)/100.0;
+	d->inventory = NULL;
+	//d->inventory = generate_inventory_dungeon();
+	d->monsters = generate_many_monsters(rand()%4, depth);
+    generate_room_name(d, d->name);
+	//if(verbose) printf("\troom \"%s\" created\n",d->name);
+    d->back = back;
+		d->left = generate_room(create_room(depth), d);
+		d->left = NULL;
+		d->right = generate_room(create_room(depth), d);
+		d->right = NULL;
+		d->foward = generate_room(create_room(depth), d);
+		d->foward = NULL;
+	d->back = NULL;
+	d->left = generate_room(create_room(2), d);
+	d->right = generate_room(create_room(2), d);
+	d->foward = generate_room(create_room(2), d);
+        printf("\nYour name must:\n - Not be 'room', 'inv', 'world', or 'NAMEHELP',\n - Not be empty (ie no letters),\n - Not have any whitespace.\n");
+    *remainingPoints -= point;
+    p->intelligence = get_player_stat("intelligence", &totalPoints, &remainingPoints);
+    p->strength = get_player_stat("strength", &totalPoints, &remainingPoints);
+    p->speed = get_player_stat("speed", &totalPoints, &remainingPoints);
+    p->charisma = get_player_stat("charisma", &totalPoints, &remainingPoints);
+    p->luck = get_player_stat("luck", &totalPoints, &remainingPoints);
+    i->inv = NULL;
+    i->equip = NULL;
+        inv = inv->next;
+    for(temp = inv, i = 0; temp != NULL; temp = temp->next, i++){
+            prev->next = temp->next;
+    strcpy(p->name, name);
+    p->inventory = generate_player_items();
+    p->inventory->inv = generate_inventory();
+    p->lifeTotal = 100;
+    p->life = p->lifeTotal;
+    p->race = race_human();
+    strncpy(i->name, name, MAX_INV_NAME);
+    strncpy(i->plName, plName, MAX_INV_NAME);
+    strncpy(i->desc, desc, MAX_INV_DESC);
+    i->quantity = quantity;
+    i->type = type;
+    i->effect = effect;
+    i->value = value;
+    i->usef = usef;
+    i->next = NULL;
+    il->first = NULL;
+    il->last = NULL;
+    while(temp->next) temp = temp->next;
+    for(Inv *temp = i; temp != NULL; temp = temp->next){
+        if(strcmp(temp->name, name) == 0) return 1;
+    if(name_exists(bg_glItems->first, toAdd->name)){
+        printf("\t%s already exists in the list, not appending\n",toAdd->name);
+    if(bg_glItems->first == NULL){
+        printf("\tbg_glItems was empty, putting %s at start\n",toAdd->name);
+        bg_glItems->first = toAdd;
+        bg_glItems->last = last_in_list(bg_glItems->first);
+        bg_glItems->last->next = NULL;
+    if(bg_glItems->last == bg_glItems->first){
+        bg_glItems->last = toAdd;
+        bg_glItems->first->next = toAdd;
+        bg_glItems->last->next = NULL;
+    printf("\tadding %s to the end of list\n",toAdd->name);
+    toAdd->next = NULL;
+    printf("\tbg_glItems->last = %p\n",bg_glItems->last);
+    bg_glItems->last->next = toAdd;
+    bg_glItems->last = toAdd;
+    printf("\tbg_glItems->last = %p\n",bg_glItems->last);
+    bg_glItems->last->next = NULL;
+    for(Inv *temp = bg_glItems->first; temp != NULL && i < 10; temp = temp->next, i++){
+        printf("'%s'",temp->name);
+        if(temp->next) printf(", ");
+    if(strcmp(name, bg_glItems->last->name) == 0){
+        return bg_glItems->last;
+    Inv *temp = bg_glItems->first;
+        printf("\ttesting %s (%p) against %s. temp->next = %s (%p)\n",temp->name,temp, name, temp->next?temp->next->name:"NULL", temp->next);
+        if(strcmp(name,temp->name) == 0){
+            printf("\tname (%s) matches temp->name(%s)\n",name,temp->name);
+        temp = temp->next;
+		printf("%s, %s,%s, %d", c->command, c->response, c->help_text, c->id);
+		if(c->next){
+		c = c->next;
+        if(c == NULL) return -1;
+                if(strcmp(command, c->command) == 0){
+                        return c->id;
+                c = c->next;
+        return -1;
+		a = a->next;
+		printf("%s",a->arg);
+		if(a->next){
+		a = a->next;
+	strcpy(a->arg, argument);
+	a->id = id;
+	a->next = NULL;
+	while(a->next) a = a->next;
+	a->next = arg_create_list(argument, id);
+			for(int c = j; c < MAX_COMMAND_LENGTH-1; c++){
+			command[MAX_COMMAND_LENGTH - 1] = '\0';
+				j --;				
+				for(int c = j+i; c < MAX_COMMAND_LENGTH-1; c++){
+				command[MAX_COMMAND_LENGTH-1] = '\0';
+					i--;
+		printf(C_C"%s"C_W"\n    %s\n",c->command,c->help_text);
+		c = c->next;
+	int id = a->id;
+	if(id == -1){
+		while(c && c->id != id) c = c->next;
+		if(c->id == ID_EXIT && id == ID_EXIT){
+			printf("%s\n",c->response);
+			if(c->response[0] != '\0' && c->response[0] != '\n'){
+				printf("%s\n",c->response);
+			return -1;
+	strcpy(c->command, command);
+	strcpy(c->response, response);
+	strcpy(c->help_text, help_text);
+	c->id = id;
+	c->next = NULL;
+	a->next = NULL;
+	c->next = create_command_list(ID_EXIT, "exit", "exiting program", "Exits the program.");
+	while(c->next != NULL){
+		c = c->next;
+	c->next = create_command_list(id, command, response, help_text);
+    strncpy(it->name, name, MAX_INV_NAME);
+    strncpy(it->plName, plName, MAX_INV_NAME);
+    strncpy(it->effectDesc, desc, MAX_INV_DESC);
+    it->bodyLocation = bloc;
+    if(target == NULL || target->curr == NULL){
+    double damage = i->effect;
+    int crt = rand()%(int)round((SKILL_CAP - round(p->luck))/4 + 1);
+        damage = damage * 2 + (double)p->luck/SKILL_CAP;
+    target->curr->life -= damage;
+            p->name, damage, target->curr->name, is_vowel(i->name[0])?"n":"", i->name, target->curr->name, target->curr->life >= 0?target->curr->life:0,
+            target->curr->lifeTotal);
+    if(target->curr->life < 0.1) target->curr->dief(target);
+    if(i->quantity < 1){
+        printf("You have no more "C_B"%s"C_W"\n",i->name);
+    i->quantity -= 1;
+    double heal = cap(i->effect, target->curr->lifeTotal - target->curr->life);
+    //printf("healing %p: %s\n",target->curr, target->curr->name);
+    target->curr->life += heal;
+            p->name,
+            target->curr->name,
+            target->curr == p ? "You":target->curr->name,
+            target->curr == p ? "now have":"now has",
+            target->curr->life, target->curr->lifeTotal);
+            i->quantity,
+            i->quantity == 1?i->name:i->plName);
+    strncpy(r->name, name, MAX_INV_NAME);
+    strncpy(r->plName, plName, MAX_INV_NAME);
+    strncpy(r->desc, desc, MAX_INV_DESC);
+    //printf("testing %s against %s\n", race->name, name);
+    return strcmp(name,race->name) == 0;
+    if(digit[0] == '\0') return -1;
+/*----------------------
+  ----------------------*/
+	return (double) 1/(exp(-x)+1);
+	return (x & (x-1)) == 0;
+/*----------------
+  ----------------*/
+			return c - 32;

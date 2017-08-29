@@ -1,9 +1,11 @@
 #include "game.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "glItemList.h"
+#include "stdlib.h"
 
-void player_die(void *ptr){
-    Character *p = (Character*) ptr;
+void player_die(void *ptr, Character *p){
+    Character *pa = (Character*) ptr;
     if(p == NULL){
         printf("Tried to kill player but player does not exist\n");
         exit(EXIT_FAILURE);
@@ -12,7 +14,7 @@ void player_die(void *ptr){
     exit(EXIT_SUCCESS);
 }
 
-void monster_die(void *ptr){
+void monster_die(void *ptr, Character *p){
     //printf("killing %p\n",ptr);
     Charlist *ml = (Charlist *)ptr;
     printf(C_R"%s"C_W" died\n",ml->curr->name);
@@ -44,5 +46,7 @@ void monster_die(void *ptr){
         temp->prev->next = ml->curr;
         free(temp);
     }
-    //TODO: use encapsulating character list or similar to be able to remove specific monsters from the list when they die
+    Inv *temp = get_glItem_name(rand()%10?"Potion of Minor Healing":"Potion of Major Healing");
+    printf("You got %s %s\n",temp->quantity==1?"a":"multiple",temp->quantity==1?temp->name:temp->plName);
+    p->inventory->inv = add_to_inv(get_glItem_name(temp->name), p->inventory->inv);
 }

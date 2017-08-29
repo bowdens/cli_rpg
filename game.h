@@ -72,7 +72,7 @@ typedef struct inv Inv;
 typedef struct character Character;
 
 typedef void (*Usef)(void*, void*, void*);
-typedef void (*Dief)(void *);
+typedef void (*Dief)(void*, Character*);
 
 typedef struct itemType{
     char name[MAX_INV_NAME]; //name of the type (eg sword)
@@ -244,6 +244,8 @@ Charlist *create_charlist(void);
 Inv *find_item(Inv *i, char *name);
 
 Inv *find_item_index(Inv *it, int x);
+
+Inv *add_to_inv(Inv *toAdd, Inv *i);
 
 int item_exists(Inv *i, char *name);
 

@@ -6,7 +6,7 @@
 #include <time.h>
 #include <string.h>
 #include "tomlib.h"
-
+#include "glItemList.h"
 #include "race.h"
 
 #define ID_LEFT 1
@@ -154,7 +154,7 @@ int main(int argc, char **argv){
         if(seed_num > 0) seed = (unsigned int)seed_num;
     }
 
-	printf("%sseed = %d\n",verbose?" - ":">",seed);
+	printf("%sseed = %d\n",verbose?" - ":"> ",seed);
 	srand(seed);
 	//printf("srand(%d)\n",seed);
 
@@ -209,13 +209,15 @@ int main(int argc, char **argv){
 						print_room(d);
 					}else if(strcmp(a->next->arg, "inv") == 0){
 						print_inventory(p->inventory);
+                    }else if(strcmp(a->next->arg, "allitems") == 0){
+                        print_glItems();
 					}else if((temp = find_character(d->monsters, p, a->next->arg)) != NULL){
 						print_character(temp);
 					}else if((tempR = find_race(a->next->arg)) != NULL){
                         print_race(tempR);
                     }else{
 						//there is no matching argument to be printed
-						printf("That cannot be printed\nPlease choose from 'world', 'room', and 'inv', or a character name (such as %s)\n",p->name);
+						printf("That cannot be printed\nPlease choose from 'world', 'room', 'allitems', and 'inv', or a character name (such as %s)\n",p->name);
 					}
 				}else{
 					printf("Please specify an argument eg 'print world'\n");

@@ -16,13 +16,13 @@
 #define ROOM_CO 3
 
 //global itemlist
-GlItemList *glItems = NULL;
-
 void init_glItemList(void){
-    glItems = append_glItemList(create_inv_element("Rusty Sword", "Rusty Swords", "At least its better than your hands", 1, item_sword(), 4.8, 5,  use_sword));
-    glItems = append_glItemList(create_inv_element("Potion of Minor Healing", "Potions of Minor Healing", "A faintly glowing blue liquid", 1, item_hPotion(), 12, 20, use_potionh));
-    glItems = append_glItemList(create_inv_element("Claw","Claws","They look like they could do some damage",1,item_melee(), 5, 3, use_sword));
-    glItems = append_glItemList(create_inv_element("Steel Sword", "Steel Swords", "Its sharp and in pretty good condition",1, item_sword(), 9.2, 45, use_sword));
+    append_glItemList(create_inv_element("Rusty Sword", "Rusty Swords", "At least its better than your hands", 1, item_sword(), 4.8, 5,  use_sword));
+    append_glItemList(create_inv_element("Potion of Minor Healing", "Potions of Minor Healing", "A faintly glowing blue liquid", 1, item_hPotion(), 12, 20, use_potionh));
+    append_glItemList(create_inv_element("Claw","Claws","They look like they could do some damage",1,item_melee(), 5, 3, use_sword));
+    append_glItemList(create_inv_element("Steel Sword", "Steel Swords", "Its sharp and in pretty good condition",1, item_sword(), 9.2, 45, use_sword));
+    append_glItemList(create_inv_element("Potion of Major Healing", "Potions of Major Healing", "A glowing blue liquid", 1, item_hPotion(), 40, 50, use_potionh));
+    append_glItemList(create_inv_element("Bronze Knife","Bronze Knives","A small but sharp weapon",1,item_sword(),5,10,use_sword));
     if(verbose){
         printf("item list is: ");
         print_glItems();
@@ -87,11 +87,11 @@ void pr_i(int in){
 
 void print_character(Character *p){
 	printf(C_Y"%s"C_W" (%s) %.1lf/%.1lf\n",p->name,p->race->name, p->life, p->lifeTotal);
-	printf("\t"C_C"Intelligence"C_W": "C_Y"%.1lf\n"C_W,p->intelligence);
-	printf("\t"C_C"Strength"C_W": "C_Y"%.1lf\n"C_W,p->strength);
-	printf("\t"C_C"Speed"C_W": "C_Y"%.1lf\n"C_W,p->speed);
-	printf("\t"C_C"Charisma"C_W": "C_Y"%.1lf\n"C_W,p->charisma);
-	printf("\t"C_C"Luck"C_W": "C_Y"%.1lf\n"C_W,p->luck);
+	printf("\t"C_G"Intelligence"C_W": "C_Y"%.1lf\n"C_W,p->intelligence);
+	printf("\t"C_G"Strength"C_W": "C_Y"%.1lf\n"C_W,p->strength);
+	printf("\t"C_G"Speed"C_W": "C_Y"%.1lf\n"C_W,p->speed);
+	printf("\t"C_G"Charisma"C_W": "C_Y"%.1lf\n"C_W,p->charisma);
+	printf("\t"C_G"Luck"C_W": "C_Y"%.1lf\n"C_W,p->luck);
 	printf("%s is carrying:\n", p->name);
 	print_inventory(p->inventory);
 }
@@ -175,7 +175,7 @@ Inv *add_to_inv(Inv *toAdd, Inv *i){
     if(i == NULL) return toAdd;
     if(find_item(i, toAdd->name)){
         find_item(i, toAdd->name)->quantity += toAdd->quantity;
-        free(toAdd);
+        if(toAdd != find_item(i,toAdd->name)) free(toAdd);
         return i;
     }
     Inv *temp;
@@ -381,19 +381,21 @@ Inv *create_inv(){
 
 Inv *generate_inventory(){
 	Inv *i = create_inv();
-
+    //printf("glItems: ");
+    //print_glItems();
+    //printf("\n");
     i = get_glItem_name("Rusty Sword");
     assert(i);
-    printf("added rsuty sword\n");
+    //printf("added rusty sword\n");
 
     i->next = get_glItem_name("Potion of Minor Healing");
     assert(i->next);
     i->next->quantity = 3;
-    printf("added potion\n");
+    //printf("added potion\n");
 
     i->next->next = get_glItem_name("Steel Sword");
     assert(i->next->next);
-    printf("added steel sword\n");
+    //printf("added steel sword\n");
 
     i->next->next->next = NULL;
 
@@ -401,7 +403,8 @@ Inv *generate_inventory(){
 }
 
 Inv *generate_inventory_dungeon(void){
-    Inv *i = create_inv();
+    //Inv *i = create_inv();
+    Inv *i = NULL;
     return i;
 }
 
@@ -579,10 +582,21 @@ Character *generate_monster(int depth){
 
     m->inventory = create_items();
 
+    //printf("Getting claw for monster inv\n");
+    //printf("List is: ");
+    //print_glItems();
+    //printf("\n");
+
     m->inventory->inv = get_glItem_name("Claw");
     assert(m->inventory->inv);
 
+
+    //printf("getting potion for monster inv\n");
+    //printf("list is: ");
+    //print_glItems();
+    //printf("\n");
     m->inventory->inv->next = get_glItem_name("Potion of Minor Healing");
+    assert(m->inventory->inv->next);
 
     generate_stats(m, depth * 5);
 
@@ -726,7 +740,7 @@ int monster_over_level(Charlist *m, int level, char mName[MAX_CHARACTER_NAME-10]
 }
 
 void generate_room_name(Dungeon *d, char name[MAX_ROOM_NAME]){
-	if(verbose) printf("\t\t\tgenerate_room_name called\n");
+	//if(verbose) printf("\t\t\tgenerate_room_name called\n");
 	int high = highest_dungeon_attrib(d, 60);
 	char prefix[MAX_ROOM_SUBNAME] = {0};
 	char room[MAX_ROOM_SUBNAME] = {0};
@@ -743,26 +757,26 @@ void generate_room_name(Dungeon *d, char name[MAX_ROOM_NAME]){
 	switch(high){
 		case ATTRIB_DAMAGE:
 			pNames = read_subn("damage_prefix.subn");
-			if(verbose) printf("\t\t\troom type: damaged\n");
+			//if(verbose) printf("\t\t\troom type: damaged\n");
 			break;
 		case ATTRIB_DINGE:
 			pNames = read_subn("dinge_prefix.subn");
-            if(verbose) printf("\t\t\troom type: dinge\n");
+            //if(verbose) printf("\t\t\troom type: dinge\n");
 			break;
 		case ATTRIB_HAUNT:
 			pNames = read_subn("haunt_prefix.subn");
-            if(verbose) printf("\t\t\troom type: haunt\n");
+            //if(verbose) printf("\t\t\troom type: haunt\n");
 			break;
 		case ATTRIB_FAITH:
 			pNames = read_subn("faith_prefix.subn");
-            if(verbose) printf("\t\t\troom type: faith\n");
+            //if(verbose) printf("\t\t\troom type: faith\n");
 			break;
 		default:
 			pNames = read_subn("none_prefix.subn");
-            if(verbose) printf("\t\t\tno room type!\n");
+            //if(verbose) printf("\t\t\tno room type!\n");
 			break;
 	}
-	if(verbose) printf("\t\t\tread subn\n");
+	//if(verbose) printf("\t\t\tread subn\n");
 	//randomise prefix
     //if(verbose) printf("\t\t\tFinding length of char list\n");
 	clistl = clist_length(pNames);
@@ -775,7 +789,7 @@ void generate_room_name(Dungeon *d, char name[MAX_ROOM_NAME]){
         clistl = 1;
     }
 	r = rand()%clistl;
-    if(verbose) printf("\t\t\tr = %d\n",r);
+    //if(verbose) printf("\t\t\tr = %d\n",r);
     for(int i = 0; i < r && pNames->next; i ++) pNames = pNames->next;
     //printf("\t\t\tlooped to random pNames. pNames = %p\n", pNames);
 	strcpy(prefix, pNames->text);
@@ -865,12 +879,12 @@ Dungeon *create_room(int depth){
 	d->dinge = (rand()%10000)/100.0;
 	d->haunt = (rand()%10000)/100.0;
 	d->faith = (rand()%10000)/100.0;
-	if(verbose) printf("\t\tattributes created\n");
+	//if(verbose) printf("\t\tattributes created\n");
 
 	d->inventory = NULL;
 	//generate_inventory();
     //if(verbose) printf("\t\tgenerating inventory\n");
-	d->inventory = generate_inventory_dungeon();
+	//d->inventory = generate_inventory_dungeon();
 	//if(verbose) printf("\t\tgenerated inv\n\t\tgenerating monsters");
 	d->monsters = generate_many_monsters(rand()%4, depth);
 	//if(verbose) printf("\t\tgenerated monster\n");
@@ -878,7 +892,7 @@ Dungeon *create_room(int depth){
 	//room name must be last because it is dependant on the above features
     //if(verbose)printf("\t\tgenerating room name\n");
     generate_room_name(d, d->name);
-	if(verbose) printf("\troom \"%s\" created\n",d->name);
+	//if(verbose) printf("\troom \"%s\" created\n",d->name);
 	return d;
 }
 
@@ -972,11 +986,11 @@ int get_player_stat(char *stat, int *totalPoints, int *remainingPoints){
     //returns a value entered by the user which is lower than the remaining points. reduces the remaining points by the value entered
     //only accepts integers >= 0
     if(*remainingPoints <= 0){
-        printf("\nYou have 0 points left to spend. Setting "C_C"%s"C_W" to 0.\n",stat);
+        printf("\nYou have 0 points left to spend. Setting "C_G"%s"C_W" to 0.\n",stat);
         return 0;
     }
 
-    printf("\nYou have %d/%d points to spend.\nEnter your "C_C"%s"C_W": ",*remainingPoints, *totalPoints, stat);
+    printf("\nYou have %d/%d points to spend.\nEnter your "C_G"%s"C_W": ",*remainingPoints, *totalPoints, stat);
 
     int point = *totalPoints;
     char inputPoint[100] = {0};
@@ -984,7 +998,7 @@ int get_player_stat(char *stat, int *totalPoints, int *remainingPoints){
         fgets(inputPoint, 100, stdin);
         //printf("You entered %s = %d\n",inputPoint, atoi(inputPoint));
         if(!is_num(inputPoint) || atoi(inputPoint) < 0 || atoi(inputPoint) > *remainingPoints){
-            printf("\nError: You entered an invalid value for "C_C"%s"C_W". You have %d/%d points left to spend.\nEnter your "C_C"%s"C_W": ",stat, *remainingPoints, *totalPoints, stat);
+            printf("\nError: You entered an invalid value for "C_G"%s"C_W". You have %d/%d points left to spend.\nEnter your "C_C"%s"C_W": ",stat, *remainingPoints, *totalPoints, stat);
         }else{
             point = atoi(inputPoint);
             break;

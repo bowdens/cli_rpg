@@ -98,7 +98,7 @@ void use_sword(void *inv, void *character, void *player){
     printf(C_Y"%s"C_W" dealt "C_R"%.1lf"C_W" damage to "C_R"%s"C_W" using a%s "C_C"%s"C_W". "C_R"%s"C_W" now has %.1lf/%.1lf health remaining.\n",
             p->name, damage, target->curr->name, is_vowel(i->name[0])?"n":"", i->name, target->curr->name, target->curr->life >= 0?target->curr->life:0,
             target->curr->lifeTotal);
-    if(target->curr->life < 0.1) target->curr->dief(target);
+    if(target->curr->life < 0.1) target->curr->dief(target, p);
 }
 
 double cap(double amount, double max){
@@ -122,7 +122,7 @@ void use_potionh(void *inv, void *character, void *player){
         return;
     }
     if(i->quantity < 1){
-        printf("You have no more "C_B"%s"C_W"\n",i->name);
+        printf("You have no more "C_C"%s"C_W " remaining\n",i->plName);
         return;
     }
     i->quantity -= 1;
@@ -136,7 +136,8 @@ void use_potionh(void *inv, void *character, void *player){
             target->curr == p ? "You":target->curr->name,
             target->curr == p ? "now have":"now has",
             target->curr->life, target->curr->lifeTotal);
-    printf("You have "C_Y"%d"C_W" remaining %s.\n",
+
+    printf("You have "C_Y"%d"C_W" remaining "C_C"%s"C_W".\n",
             i->quantity,
             i->quantity == 1?i->name:i->plName);
 }

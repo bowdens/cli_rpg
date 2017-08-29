@@ -8,7 +8,7 @@ Inv *create_inv_element(char *name, char *plName, char *desc, int quantity, Item
 
 GlItemList *create_glItemList(void);
 
-GlItemList *append_glItemList(Inv *toAdd);
+void append_glItemList(Inv *toAdd);
 
 GlItemList *get_glItems(void);
 
