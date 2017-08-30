@@ -14,6 +14,19 @@ Race *make_race(char *name, char *plName, char *desc){
     return r;
 }
 
+int same_race(Race *race, char *name){
+    //printf("testing %s against %s\n", race->name, name);
+    return strcmp(name,race->name) == 0;
+}
+
+Race *find_race(char *name){
+    if(name == NULL) return NULL;
+    if(same_race(gl_race_human, name)) return gl_race_human;
+    if(same_race(gl_race_voidwretch, name)) return gl_race_voidwretch;
+    if(same_race(gl_race_kaskeer, name)) return gl_race_kaskeer;
+    return NULL;
+}
+
 Race *gl_race_human = NULL;
 
 Race *race_human(void){
@@ -50,15 +63,14 @@ Race *race_kaskeer(void){
     }
 }
 
-int same_race(Race *race, char *name){
-    //printf("testing %s against %s\n", race->name, name);
-    return strcmp(name,race->name) == 0;
-}
+Race *gl_race_cavegolem = NULL;
 
-Race *find_race(char *name){
-    if(name == NULL) return NULL;
-    if(same_race(gl_race_human, name)) return gl_race_human;
-    if(same_race(gl_race_voidwretch, name)) return gl_race_voidwretch;
-    if(same_race(gl_race_kaskeer, name)) return gl_race_kaskeer;
-    return NULL;
+Race *race_cavegolem(void){
+    if(gl_race_cavegolem){
+        return gl_race_cavegolem;
+    }else{
+        gl_race_cavegolem = make_race("cave golem", "cave golems",
+                "First raised by dark magicians eons ago, cave golems can now be found in some of the deeper cave systems");
+        return gl_race_cavegolem;
+    }
 }

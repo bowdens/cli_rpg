@@ -242,7 +242,7 @@ int main(int argc, char **argv){
                 }
                 if(is_num(a->next->next->arg)){
                     if(verbose) printf("finding character using index\n");
-                    if(atoi(a->next->arg) == 0) target = p;
+                    if(atoi(a->next->next->arg) == 0) target = p;
                     else target = find_character_index(d->monsters, p, atoi(a->next->next->arg));
                 }else{
                     if(verbose) printf("finding character through name\n");

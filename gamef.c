@@ -121,7 +121,7 @@ Character *find_character_index(Charlist *ml, Character *p, int x){
         if(verbose) printf("Could not find character with index %d\n",x);
         return NULL;
     }
-    //printf("returning %s\n",t->name);
+    //printf("returning %s\n",t?t->name:"NULL");
     return t;
 }
 
@@ -155,6 +155,7 @@ Inv *find_item_index(Inv *i, int x){
         if(verbose) printf("Could not find item with index %d\n",x);
         return NULL;
     }
+    //printf("returning %s\n",t?t->name:"NULL");
     return t;
 }
 
