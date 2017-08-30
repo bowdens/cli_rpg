@@ -601,7 +601,7 @@ Character *generate_monster(int depth){
 
     generate_stats(m, depth * 5);
 
-    m->race = rand()%3?race_kaskeer():race_voidwretch();
+    m->race = rand()%3?race_kaskeer():race_undead();
 
 	m->dialogue = generate_dialogue(m->name);
 

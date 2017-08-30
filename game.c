@@ -203,6 +203,7 @@ int main(int argc, char **argv){
 				if(a->next){
                     Character *temp;
                     Race *tempR;
+                    printf("printing something\n");
 					if(strcmp(a->next->arg, "world") == 0){
 						print_world(start, 0);
 					}else if(strcmp(a->next->arg, "room") == 0){
@@ -212,8 +213,10 @@ int main(int argc, char **argv){
                     }else if(strcmp(a->next->arg, "allitems") == 0){
                         print_glItems();
 					}else if((temp = find_character(d->monsters, p, a->next->arg)) != NULL){
+                        printf("printing character\n");
 						print_character(temp);
 					}else if((tempR = find_race(a->next->arg)) != NULL){
+                        printf("printing race\n");
                         print_race(tempR);
                     }else{
 						//there is no matching argument to be printed
