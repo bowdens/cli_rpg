@@ -92,7 +92,7 @@ void print_character(Character *p){
 	printf("\t"C_G"Speed"C_W": "C_Y"%.1lf\n"C_W,p->speed);
 	printf("\t"C_G"Charisma"C_W": "C_Y"%.1lf\n"C_W,p->charisma);
 	printf("\t"C_G"Luck"C_W": "C_Y"%.1lf\n"C_W,p->luck);
-	printf("%s is carrying:\n", p->name);
+	printf(C_Y"%s"C_W" is carrying:\n", p->name);
 	print_inventory(p->inventory);
 }
 
@@ -991,15 +991,17 @@ int get_player_stat(char *stat, int *totalPoints, int *remainingPoints){
         return 0;
     }
 
-    printf("\nYou have %d/%d points to spend.\nEnter your "C_G"%s"C_W": ",*remainingPoints, *totalPoints, stat);
+    printf("\nYou have %d/%d points to spend.\nEnter your "C_G"%s"C_W": "C_Y,*remainingPoints, *totalPoints, stat);
 
     int point = *totalPoints;
     char inputPoint[100] = {0};
     do{
         fgets(inputPoint, 100, stdin);
+        printf(C_W);
+        if(inputPoint[strlen(inputPoint)-1] == '\n') inputPoint[strlen(inputPoint)-1] = '\0';
         //printf("You entered %s = %d\n",inputPoint, atoi(inputPoint));
         if(!is_num(inputPoint) || atoi(inputPoint) < 0 || atoi(inputPoint) > *remainingPoints){
-            printf("\nError: You entered an invalid value for "C_G"%s"C_W". You have %d/%d points left to spend.\nEnter your "C_C"%s"C_W": ",stat, *remainingPoints, *totalPoints, stat);
+            printf("\nError: You entered \"%s\", which is an invalid value for "C_G"%s"C_W". You have %d/%d points left to spend.\nEnter your "C_G"%s"C_W": ",inputPoint,stat, *remainingPoints, *totalPoints, stat);
         }else{
             point = atoi(inputPoint);
             break;
@@ -1056,7 +1058,7 @@ Character *generate_player(char *parName){
     char name[MAX_CHARACTER_NAME] = {0};
     if(parName == NULL || (strcmp(parName, "") == 0 || is_valid_name(parName) == 0)){
         if(parName != NULL && !is_valid_name(parName)) printf("Warning: \"%s\" is an invalid name. ", parName);
-        printf("Enter your character's name: ");
+        printf("Enter your character's name: "C_Y);
         int validName = 0;
         while(validName == 0){
             fgets(name, MAX_CHARACTER_NAME, stdin);
@@ -1068,6 +1070,7 @@ Character *generate_player(char *parName){
 	    	    }
 	    	    i++;
 	        }
+            printf(C_W);
             if(is_valid_name(name)){
                 validName = 1;
             }else{
