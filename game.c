@@ -125,6 +125,8 @@ int has_flag(int argc, char **argv, char flag){
 }
 
 int main(int argc, char **argv){
+    printf("edited\n");
+
     verbose = has_flag(argc, argv, 'v');
 
     set_lt_verbose(return_flag_argument(argc, argv, "-ltVerbose="));

@@ -1,7 +1,4 @@
-*
-!.*
-!*.c
-!*.h
-!*.txt
-!*.subn
-!Makefile
+game
+make_race
+test_dlog
+*.o
