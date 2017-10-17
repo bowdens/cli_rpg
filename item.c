@@ -87,7 +87,10 @@ void use_sword(void *inv, void *character, void *player){
         printf("ERROR: You cannot attack with your sword because you do not exist\n");
         return;
     }
+    double added = (rand()%(int)round(p->strength*5))/10.0;
     double damage = i->effect;
+    if(verbose) printf("damage = %.1lf + %.1lf + %.1lf = %.1lf\n",damage, added, p->strength*0.5, added + p->strength*0.5 + damage);
+    damage += added + p->strength * 0.5;
     int crt = rand()%(int)round((SKILL_CAP - round(p->luck))/4 + 1);
     //printf("crt = %d\n",crt);
     if(crt == 0){

@@ -987,7 +987,7 @@ int get_player_stat(char *stat, int *totalPoints, int *remainingPoints){
     //returns a value entered by the user which is lower than the remaining points. reduces the remaining points by the value entered
     //only accepts integers >= 0
     if(*remainingPoints <= 0){
-        printf("\nYou have 0 points left to spend. Setting "C_G"%s"C_W" to 0.\n",stat);
+        printf("\nYou have 0 points left to spend. Setting "C_G"%s"C_W" to "C_Y"0"C_W".\n",stat);
         return 0;
     }
 
@@ -1001,7 +1001,7 @@ int get_player_stat(char *stat, int *totalPoints, int *remainingPoints){
         if(inputPoint[strlen(inputPoint)-1] == '\n') inputPoint[strlen(inputPoint)-1] = '\0';
         //printf("You entered %s = %d\n",inputPoint, atoi(inputPoint));
         if(!is_num(inputPoint) || atoi(inputPoint) < 0 || atoi(inputPoint) > *remainingPoints){
-            printf("\nError: You entered \"%s\", which is an invalid value for "C_G"%s"C_W". You have %d/%d points left to spend.\nEnter your "C_G"%s"C_W": ",inputPoint,stat, *remainingPoints, *totalPoints, stat);
+            printf("\nError: You entered \"%s\", which is an invalid value for "C_G"%s"C_W". You have %d/%d points left to spend.\nEnter your "C_G"%s"C_W": "C_Y,inputPoint,stat, *remainingPoints, *totalPoints, stat);
         }else{
             point = atoi(inputPoint);
             break;
