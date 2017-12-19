@@ -114,7 +114,7 @@ char *char_return_flag_argument(int argc, char **argv, char *flagPrefix){
 
 int has_flag(int argc, char **argv, char flag){
     for(int i = 0; i < argc; i ++){
-        if(argv[i][0] == '-'){
+        if(argv[i][0] == '-' && argv[i][1] != '-'){
             //this one is flag
             for(int j = 1; j < (int)strlen(argv[i]) && argv[i][j] != '='; j ++){
                 if(argv[i][j] == flag) return 1;
@@ -124,8 +124,19 @@ int has_flag(int argc, char **argv, char flag){
     return 0;
 }
 
+void init_races(void){
+    //MAKERACE MARKER
+
+    race_test();
+    race_kaskeer();
+    race_undead();
+    race_voidwretch();
+    race_dwarf();
+    race_cavegolem();
+}
+
 int main(int argc, char **argv){
-    printf("edited\n");
+    //printf("edited\n");
 
     verbose = has_flag(argc, argv, 'v');
 
@@ -165,8 +176,12 @@ int main(int argc, char **argv){
 	Dungeon *start = d;
 	if(verbose) printf(" - designated starting room\n");
 
+    if(verbose) printf(" - Initialising races\n");
+    init_races();
+
     char *tempName = char_return_flag_argument(argc, argv, "-name=");
 	if(verbose) printf(" - name from commandline read\n");
+
 
     if(tempName != NULL && strcmp(tempName, "RANDOMNAME") == 0){
         if(verbose) printf("generating random name\n");

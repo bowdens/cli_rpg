@@ -2,3 +2,5 @@ game
 make_race
 test_dlog
 *.o
+*.bckup
+*.new

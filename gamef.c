@@ -605,7 +605,7 @@ Character *generate_monster(int depth){
 
 	m->dialogue = generate_dialogue(m->name);
 
-    m->dief = monster_die;
+    m->dief = (Dief)monster_die;
 
     m->next = NULL;
     m->prev = NULL;
